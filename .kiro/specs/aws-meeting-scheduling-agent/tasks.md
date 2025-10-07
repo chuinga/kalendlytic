@@ -93,7 +93,8 @@
   - Configure token usage tracking and cost estimation
   - _Requirements: 1.1, 1.3_
 
-- [ ] 5.2 Implement AgentCore Router/Planner primitive
+- [x] 5.2 Implement AgentCore Router/Planner primitive
+
 
   - Create AgentCore router to determine optimal tool execution sequence
   - Implement planning logic for complex scheduling scenarios
