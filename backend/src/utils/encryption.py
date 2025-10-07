@@ -4,7 +4,6 @@ Encryption utilities for OAuth tokens and sensitive data using AWS KMS.
 
 import base64
 import os
-from typing import str
 from .aws_clients import get_kms_client
 
 

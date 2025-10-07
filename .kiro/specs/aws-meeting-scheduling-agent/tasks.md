@@ -10,7 +10,6 @@
 
 - [x] 2. Implement core AWS infrastructure with CDK
 
-
 - [x] 2.1 Create CoreStack with DynamoDB tables, KMS keys, and Cognito
 
   - Write CDK code for all DynamoDB tables (Users, Connections, Preferences, Meetings, AgentRuns, AuditLogs)
@@ -35,7 +34,8 @@
   - _Requirements: 9.6_
 
 - [ ] 3. Implement OAuth integration and token management
-- [ ] 3.1 Create Google OAuth flow implementation
+- [x] 3.1 Create Google OAuth flow implementation
+
 
   - Write Python code for Google OAuth 2.0 authorization flow with PKCE
   - Implement token exchange and refresh token handling
