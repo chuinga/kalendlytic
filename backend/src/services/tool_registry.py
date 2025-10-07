@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional
 from .agentcore_tool_invocation import AgentCoreToolInvocation
 from ..tools.availability_tool import AvailabilityTool, AvailabilityRequest
 from ..tools.event_management_tool import EventManagementTool, EventRequest, RescheduleRequest
+from ..tools.email_communication_tool import EmailCommunicationTool, EmailRequest, EmailType
 from ..models.connection import Connection
 from ..models.preferences import Preferences
 from ..utils.logging import setup_logger
@@ -31,6 +32,7 @@ class ToolRegistry:
         self.tool_invocation = tool_invocation_service
         self.availability_tool = AvailabilityTool()
         self.event_management_tool = EventManagementTool()
+        self.email_communication_tool = EmailCommunicationTool()
         
         # Register all tools
         self._register_all_tools()
@@ -43,6 +45,9 @@ class ToolRegistry:
             
             # Register event management tool
             self._register_event_management_tool()
+            
+            # Register email communication tool
+            self._register_email_communication_tool()
             
             logger.info("All tools registered successfully")
             
@@ -202,6 +207,71 @@ class ToolRegistry:
             logger.error(f"Failed to register event management tool: {str(e)}")
             raise
     
+    def _register_email_communication_tool(self) -> None:
+        """Register the email communication tool with AgentCore."""
+        try:
+            # Get the tool schema from the email communication tool
+            tool_schema = self.email_communication_tool.get_tool_schema()
+            
+            # Create wrapper function for AgentCore integration
+            def email_communication_tool_wrapper(inputs: Dict[str, Any]) -> Dict[str, Any]:
+                """Wrapper function for email communication tool execution."""
+                try:
+                    user_id = inputs.get('user_id')
+                    email_type = inputs.get('email_type')
+                    recipients = inputs.get('recipients', [])
+                    connections = inputs.get('connections', [])
+                    preferences = inputs.get('preferences')
+                    
+                    # Create email request
+                    request = EmailRequest(
+                        user_id=user_id,
+                        email_type=EmailType(email_type),
+                        recipients=recipients,
+                        subject=inputs.get('subject', ''),
+                        body=inputs.get('body', ''),
+                        meeting_data=inputs.get('meeting_data'),
+                        thread_id=inputs.get('thread_id'),
+                        provider=inputs.get('provider', 'auto'),
+                        auto_send=inputs.get('auto_send', True),
+                        template_data=inputs.get('template_data'),
+                        priority=inputs.get('priority', 'normal')
+                    )
+                    
+                    # Execute the tool
+                    result = self.email_communication_tool.send_email(request, connections, preferences)
+                    
+                    return {
+                        "success": result.success,
+                        "email_id": result.email_id,
+                        "thread_id": result.thread_id,
+                        "provider_used": result.provider_used,
+                        "is_draft": result.is_draft,
+                        "recipients_sent": result.recipients_sent,
+                        "error_message": result.error_message,
+                        "execution_time_ms": result.execution_time_ms
+                    }
+                    
+                except Exception as e:
+                    logger.error(f"Email communication tool execution failed: {str(e)}")
+                    return {
+                        "success": False,
+                        "error": str(e)
+                    }
+            
+            # Register the tool function
+            self.tool_invocation.register_tool(
+                tool_name="send_email",
+                tool_function=email_communication_tool_wrapper,
+                schema=tool_schema
+            )
+            
+            logger.info("Email communication tool registered successfully")
+                
+        except Exception as e:
+            logger.error(f"Failed to register email communication tool: {str(e)}")
+            raise
+    
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
         return list(self.tool_invocation.registered_tools.keys())
@@ -320,6 +390,60 @@ class ToolRegistry:
             
         except Exception as e:
             logger.error(f"Failed to execute event management tool: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "data": None
+            }
+    
+    def execute_email_communication_tool(self, 
+                                       email_type: str,
+                                       user_id: str,
+                                       recipients: List[str],
+                                       connections: List[Connection],
+                                       preferences: Optional[Preferences] = None,
+                                       **kwargs) -> Dict[str, Any]:
+        """
+        Execute the email communication tool with proper context.
+        
+        Args:
+            email_type: Type of email (confirmation, reschedule, cancellation, etc.)
+            user_id: User identifier
+            recipients: List of recipient email addresses
+            connections: Active email connections
+            preferences: User preferences
+            **kwargs: Additional parameters
+            
+        Returns:
+            Tool execution result
+        """
+        try:
+            # Prepare parameters
+            parameters = {
+                "email_type": email_type,
+                "user_id": user_id,
+                "recipients": recipients,
+                "connections": connections,
+                "preferences": preferences,
+                **kwargs
+            }
+            
+            # Execute through AgentCore
+            result = self.tool_invocation.invoke_tool(
+                tool_name="send_email",
+                inputs=parameters
+            )
+            
+            return {
+                "success": result.success,
+                "data": result.data,
+                "error": result.error,
+                "execution_time_ms": result.execution_time_ms,
+                "retry_count": result.retry_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to execute email communication tool: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
