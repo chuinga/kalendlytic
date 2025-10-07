@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { ConnectionStatus } from '@/components/connections/ConnectionStatus'
 import { ConnectionsPage } from '@/components/connections/ConnectionsPage'
 import { AvailabilityTimeline, ConflictResolver, MeetingScheduler, AgentActionReview } from '@/components/calendar'
+import { PreferencesPage } from '@/components/preferences'
 import { CalendarViewMode, SchedulingConflict, MeetingRequest, AgentAction } from '@/types/calendar'
 
 export default function Dashboard() {
@@ -252,13 +253,8 @@ export default function Dashboard() {
           )}
 
           {activeTab === 'preferences' && (
-            <div className="p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Preferences & Settings
-              </h2>
-              <p className="text-gray-600">
-                Preferences interface will be implemented in task 8.4
-              </p>
+            <div className="-m-6 h-full">
+              <PreferencesPage />
             </div>
           )}
 
