@@ -11,6 +11,7 @@ from ..tools.availability_tool import AvailabilityTool, AvailabilityRequest
 from ..tools.event_management_tool import EventManagementTool, EventRequest, RescheduleRequest
 from ..tools.email_communication_tool import EmailCommunicationTool, EmailRequest, EmailType
 from ..tools.preference_management_tool import PreferenceManagementTool
+from ..tools.conflict_resolution_tool import ConflictResolutionTool
 from ..models.connection import Connection
 from ..models.preferences import Preferences
 from ..models.meeting import Meeting
@@ -36,6 +37,7 @@ class ToolRegistry:
         self.event_management_tool = EventManagementTool()
         self.email_communication_tool = EmailCommunicationTool()
         self.preference_management_tool = PreferenceManagementTool()
+        self.conflict_resolution_tool = ConflictResolutionTool()
         
         # Register all tools
         self._register_all_tools()
@@ -54,6 +56,9 @@ class ToolRegistry:
             
             # Register preference management tool
             self._register_preference_management_tool()
+            
+            # Register conflict resolution tool
+            self._register_conflict_resolution_tool()
             
             logger.info("All tools registered successfully")
             
@@ -405,6 +410,40 @@ class ToolRegistry:
             logger.error(f"Failed to register preference management tool: {str(e)}")
             raise
     
+    def _register_conflict_resolution_tool(self) -> None:
+        """Register the conflict resolution tool with AgentCore."""
+        try:
+            # Get the tool schema from the conflict resolution tool
+            tool_schema = self.conflict_resolution_tool.get_tool_schema()
+            
+            # Create wrapper function for AgentCore integration
+            def conflict_resolution_tool_wrapper(inputs: Dict[str, Any]) -> Dict[str, Any]:
+                """Wrapper function for conflict resolution tool execution."""
+                try:
+                    # Execute the tool using its invoke method
+                    result = self.conflict_resolution_tool.invoke(inputs)
+                    return result
+                    
+                except Exception as e:
+                    logger.error(f"Conflict resolution tool execution failed: {str(e)}")
+                    return {
+                        "success": False,
+                        "error": str(e)
+                    }
+            
+            # Register the tool function
+            self.tool_invocation.register_tool(
+                tool_name="resolve_scheduling_conflicts",
+                tool_function=conflict_resolution_tool_wrapper,
+                schema=tool_schema
+            )
+            
+            logger.info("Conflict resolution tool registered successfully")
+                
+        except Exception as e:
+            logger.error(f"Failed to register conflict resolution tool: {str(e)}")
+            raise
+    
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
         return list(self.tool_invocation.registered_tools.keys())
@@ -622,6 +661,57 @@ class ToolRegistry:
             
         except Exception as e:
             logger.error(f"Failed to execute preference management tool: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "data": None
+            }
+    
+    def execute_conflict_resolution_tool(self, 
+                                       action: str,
+                                       user_id: str,
+                                       connections: List[Connection],
+                                       preferences: Optional[Preferences] = None,
+                                       **kwargs) -> Dict[str, Any]:
+        """
+        Execute the conflict resolution tool with proper context.
+        
+        Args:
+            action: Conflict resolution action (detect_conflicts, generate_options, execute_resolution, get_statistics)
+            user_id: User identifier
+            connections: Active calendar connections
+            preferences: User preferences
+            **kwargs: Additional parameters specific to the action
+            
+        Returns:
+            Tool execution result
+        """
+        try:
+            # Prepare parameters
+            parameters = {
+                "action": action,
+                "user_id": user_id,
+                "connections": connections,
+                "preferences": preferences,
+                **kwargs
+            }
+            
+            # Execute through AgentCore
+            result = self.tool_invocation.invoke_tool(
+                tool_name="resolve_scheduling_conflicts",
+                inputs=parameters
+            )
+            
+            return {
+                "success": result.success,
+                "data": result.data,
+                "error": result.error,
+                "execution_time_ms": result.execution_time_ms,
+                "retry_count": result.retry_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to execute conflict resolution tool: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
