@@ -194,7 +194,9 @@ class AgentCoreRouter:
                 'timestamp': datetime.utcnow().isoformat(),
                 'conflicts': conflicts,
                 'strategy': resolution_strategy,
-                'steps_generated': len(resolution_steps)
+                'steps_generated': len(resolution_steps),
+                'rationale': f"Selected {resolution_strategy} strategy based on {len(conflicts)} conflicts with {conflict_analysis['resolution_complexity']} complexity. This approach balances efficiency with thoroughness.",
+                'natural_language_explanation': self._generate_conflict_explanation(conflicts, resolution_strategy, available_alternatives)
             })
             context.updated_at = datetime.utcnow()
             
@@ -687,3 +689,35 @@ class AgentCoreRouter:
             ))
         
         return steps
+    
+    def _generate_conflict_explanation(
+        self,
+        conflicts: List[Dict[str, Any]],
+        strategy: str,
+        alternatives: List[Dict[str, Any]]
+    ) -> str:
+        """Generate natural language explanation for conflict resolution decisions."""
+        conflict_count = len(conflicts)
+        alternative_count = len(alternatives)
+        
+        explanation = f"I detected {conflict_count} scheduling conflict{'s' if conflict_count != 1 else ''} "
+        
+        if conflict_count == 1:
+            explanation += "involving overlapping time slots. "
+        else:
+            explanation += "with multiple overlapping meetings. "
+        
+        if strategy == "auto_reschedule":
+            explanation += f"Since there {'are' if alternative_count != 1 else 'is'} {alternative_count} suitable alternative time{'s' if alternative_count != 1 else ''} available, I'm automatically rescheduling to the best option to minimize disruption."
+        elif strategy == "propose_alternatives":
+            explanation += f"I found {alternative_count} alternative time slots and will present them for your review, allowing you to choose the most convenient option."
+        elif strategy == "interactive_resolution":
+            explanation += "The conflicts require careful consideration of multiple factors, so I'll present a detailed analysis with options for your decision."
+        elif strategy == "batch_resolution":
+            explanation += "Multiple conflicts detected require coordinated resolution to avoid creating new conflicts while solving existing ones."
+        elif strategy == "escalate_to_human":
+            explanation += "The complexity of these conflicts exceeds automated resolution capabilities, requiring human judgment to determine the best course of action."
+        else:
+            explanation += f"I'm applying the {strategy} approach to resolve these conflicts effectively."
+        
+        return explanation
