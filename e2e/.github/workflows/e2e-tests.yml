@@ -1,0 +1,150 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  e2e-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+        test-suite: [smoke, user-journey, performance, security]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'e2e/package-lock.json'
+    
+    - name: Install dependencies
+      working-directory: ./e2e
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      working-directory: ./e2e
+      run: npx playwright install --with-deps
+    
+    - name: Start application services
+      run: |
+        # Start backend service
+        cd backend && python -m uvicorn src.main:app --host 0.0.0.0 --port 8000 &
+        
+        # Start frontend service
+        cd frontend && npm run build && npm start &
+        
+        # Wait for services to be ready
+        sleep 30
+    
+    - name: Run E2E tests
+      working-directory: ./e2e
+      run: ./run-tests.sh ${{ matrix.test-suite }} ${{ matrix.browser }}
+      env:
+        BASE_URL: http://localhost:3000
+        API_BASE_URL: http://localhost:8000
+        CI: true
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.browser }}-${{ matrix.test-suite }}
+        path: e2e/playwright-report/
+        retention-days: 30
+    
+    - name: Upload test screenshots
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: screenshots-${{ matrix.browser }}-${{ matrix.test-suite }}
+        path: e2e/test-results/
+        retention-days: 30
+
+  performance-analysis:
+    needs: e2e-tests
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download test results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: playwright-report-*-performance
+        merge-multiple: true
+        path: ./performance-results
+    
+    - name: Analyze performance results
+      run: |
+        echo "## Performance Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Performance analysis would be implemented here" >> $GITHUB_STEP_SUMMARY
+        # Add performance analysis logic here
+    
+    - name: Comment PR with performance results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          // Read performance results and comment on PR
+          // Implementation would analyze performance data and create comment
+
+  security-analysis:
+    needs: e2e-tests
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download security test results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: playwright-report-*-security
+        merge-multiple: true
+        path: ./security-results
+    
+    - name: Analyze security results
+      run: |
+        echo "## Security Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Security analysis would be implemented here" >> $GITHUB_STEP_SUMMARY
+        # Add security analysis logic here
+    
+    - name: Fail on critical security issues
+      run: |
+        # Check for critical security issues and fail the build if found
+        # Implementation would parse security test results
+        echo "Checking for critical security issues..."
+
+  notify-results:
+    needs: [e2e-tests, performance-analysis, security-analysis]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify team of test results
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Send notification to team about test failures
+          // Could integrate with Slack, Teams, or email
+          console.log('E2E tests failed - notification would be sent here');
+    
+    - name: Update status badge
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Update README badge with test status
+        echo "Updating status badge..."

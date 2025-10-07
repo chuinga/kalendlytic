@@ -1,0 +1,28 @@
+{
+  "name": "aws-meeting-scheduling-agent-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end testing suite for AWS Meeting Scheduling Agent",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:performance": "playwright test --grep @performance",
+    "test:security": "playwright test --grep @security",
+    "test:user-journey": "playwright test --grep @user-journey",
+    "report": "playwright show-report",
+    "install": "playwright install",
+    "install-deps": "playwright install-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "faker": "^6.6.6",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
