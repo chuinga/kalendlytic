@@ -1,0 +1,108 @@
+{
+  "environment": "dev",
+  "region": "us-east-1",
+  "account": "${CDK_DEFAULT_ACCOUNT}",
+  "stackPrefix": "meeting-scheduling-agent-dev",
+  "tags": {
+    "Project": "meeting-scheduling-agent",
+    "Environment": "dev",
+    "ManagedBy": "CDK",
+    "CostCenter": "development",
+    "Owner": "dev-team"
+  },
+  "core": {
+    "dynamodb": {
+      "billingMode": "PAY_PER_REQUEST",
+      "pointInTimeRecovery": false,
+      "backupRetention": 7,
+      "deletionProtection": false
+    },
+    "cognito": {
+      "passwordPolicy": {
+        "minimumLength": 8,
+        "requireUppercase": true,
+        "requireLowercase": true,
+        "requireNumbers": true,
+        "requireSymbols": false
+      },
+      "mfaConfiguration": "OPTIONAL",
+      "selfSignUpEnabled": true,
+      "emailVerificationRequired": true
+    },
+    "kms": {
+      "keyRotation": false,
+      "deletionWindow": 7
+    },
+    "secrets": {
+      "automaticRotation": false
+    }
+  },
+  "api": {
+    "lambda": {
+      "runtime": "nodejs18.x",
+      "timeout": 30,
+      "memorySize": 512,
+      "reservedConcurrency": 10,
+      "environment": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      }
+    },
+    "apiGateway": {
+      "throttling": {
+        "rateLimit": 100,
+        "burstLimit": 200
+      },
+      "cors": {
+        "allowOrigins": ["http://localhost:3000", "https://dev.meeting-scheduler.example.com"],
+        "allowMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allowHeaders": ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key"]
+      }
+    },
+    "eventBridge": {
+      "retentionDays": 7
+    }
+  },
+  "web": {
+    "s3": {
+      "versioning": false,
+      "encryption": "AES256",
+      "publicReadAccess": false,
+      "blockPublicAccess": true
+    },
+    "cloudFront": {
+      "priceClass": "PriceClass_100",
+      "cachingEnabled": true,
+      "compressionEnabled": true,
+      "customDomain": {
+        "enabled": false,
+        "domainName": "dev.meeting-scheduler.example.com",
+        "certificateArn": ""
+      }
+    }
+  },
+  "monitoring": {
+    "cloudWatch": {
+      "logRetention": 7,
+      "metricsEnabled": true,
+      "detailedMonitoring": false
+    },
+    "alarms": {
+      "enabled": true,
+      "snsNotifications": false,
+      "emailEndpoints": ["dev-team@example.com"]
+    },
+    "xray": {
+      "enabled": true,
+      "samplingRate": 0.1
+    }
+  },
+  "security": {
+    "waf": {
+      "enabled": false
+    },
+    "vpc": {
+      "enabled": false
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "environment": "staging",
+  "region": "us-east-1",
+  "account": "${CDK_DEFAULT_ACCOUNT}",
+  "stackPrefix": "meeting-scheduling-agent-staging",
+  "tags": {
+    "Project": "meeting-scheduling-agent",
+    "Environment": "staging",
+    "ManagedBy": "CDK",
+    "CostCenter": "staging",
+    "Owner": "qa-team"
+  },
+  "core": {
+    "dynamodb": {
+      "billingMode": "PAY_PER_REQUEST",
+      "pointInTimeRecovery": true,
+      "backupRetention": 14,
+      "deletionProtection": true
+    },
+    "cognito": {
+      "passwordPolicy": {
+        "minimumLength": 10,
+        "requireUppercase": true,
+        "requireLowercase": true,
+        "requireNumbers": true,
+        "requireSymbols": true
+      },
+      "mfaConfiguration": "REQUIRED",
+      "selfSignUpEnabled": false,
+      "emailVerificationRequired": true
+    },
+    "kms": {
+      "keyRotation": true,
+      "deletionWindow": 14
+    },
+    "secrets": {
+      "automaticRotation": true,
+      "rotationInterval": 30
+    }
+  },
+  "api": {
+    "lambda": {
+      "runtime": "nodejs18.x",
+      "timeout": 60,
+      "memorySize": 1024,
+      "reservedConcurrency": 50,
+      "environment": {
+        "NODE_ENV": "staging",
+        "LOG_LEVEL": "info"
+      }
+    },
+    "apiGateway": {
+      "throttling": {
+        "rateLimit": 500,
+        "burstLimit": 1000
+      },
+      "cors": {
+        "allowOrigins": ["https://staging.meeting-scheduler.example.com"],
+        "allowMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allowHeaders": ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key"]
+      }
+    },
+    "eventBridge": {
+      "retentionDays": 14
+    }
+  },
+  "web": {
+    "s3": {
+      "versioning": true,
+      "encryption": "aws:kms",
+      "publicReadAccess": false,
+      "blockPublicAccess": true
+    },
+    "cloudFront": {
+      "priceClass": "PriceClass_200",
+      "cachingEnabled": true,
+      "compressionEnabled": true,
+      "customDomain": {
+        "enabled": true,
+        "domainName": "staging.meeting-scheduler.example.com",
+        "certificateArn": "arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID"
+      }
+    }
+  },
+  "monitoring": {
+    "cloudWatch": {
+      "logRetention": 14,
+      "metricsEnabled": true,
+      "detailedMonitoring": true
+    },
+    "alarms": {
+      "enabled": true,
+      "snsNotifications": true,
+      "emailEndpoints": ["qa-team@example.com", "dev-team@example.com"]
+    },
+    "xray": {
+      "enabled": true,
+      "samplingRate": 0.2
+    }
+  },
+  "security": {
+    "waf": {
+      "enabled": true,
+      "rules": ["AWSManagedRulesCommonRuleSet", "AWSManagedRulesKnownBadInputsRuleSet"]
+    },
+    "vpc": {
+      "enabled": false
+    }
+  }
+}

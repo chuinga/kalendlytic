@@ -1,0 +1,177 @@
+{
+  "environment": "prod",
+  "region": "us-east-1",
+  "account": "${CDK_DEFAULT_ACCOUNT}",
+  "stackPrefix": "meeting-scheduling-agent-prod",
+  "tags": {
+    "Project": "meeting-scheduling-agent",
+    "Environment": "prod",
+    "ManagedBy": "CDK",
+    "CostCenter": "production",
+    "Owner": "ops-team",
+    "Backup": "required",
+    "Compliance": "required"
+  },
+  "core": {
+    "dynamodb": {
+      "billingMode": "PROVISIONED",
+      "readCapacity": 10,
+      "writeCapacity": 5,
+      "autoScaling": {
+        "enabled": true,
+        "minCapacity": 5,
+        "maxCapacity": 100,
+        "targetUtilization": 70
+      },
+      "pointInTimeRecovery": true,
+      "backupRetention": 30,
+      "deletionProtection": true
+    },
+    "cognito": {
+      "passwordPolicy": {
+        "minimumLength": 12,
+        "requireUppercase": true,
+        "requireLowercase": true,
+        "requireNumbers": true,
+        "requireSymbols": true
+      },
+      "mfaConfiguration": "REQUIRED",
+      "selfSignUpEnabled": false,
+      "emailVerificationRequired": true,
+      "advancedSecurityMode": "ENFORCED"
+    },
+    "kms": {
+      "keyRotation": true,
+      "deletionWindow": 30,
+      "multiRegion": true
+    },
+    "secrets": {
+      "automaticRotation": true,
+      "rotationInterval": 30,
+      "crossRegionReplication": true
+    }
+  },
+  "api": {
+    "lambda": {
+      "runtime": "nodejs18.x",
+      "timeout": 120,
+      "memorySize": 2048,
+      "reservedConcurrency": 200,
+      "environment": {
+        "NODE_ENV": "production",
+        "LOG_LEVEL": "warn"
+      },
+      "deadLetterQueue": {
+        "enabled": true,
+        "maxReceiveCount": 3
+      }
+    },
+    "apiGateway": {
+      "throttling": {
+        "rateLimit": 2000,
+        "burstLimit": 5000
+      },
+      "cors": {
+        "allowOrigins": ["https://meeting-scheduler.example.com"],
+        "allowMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allowHeaders": ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key"]
+      },
+      "caching": {
+        "enabled": true,
+        "ttl": 300,
+        "clusterSize": "0.5"
+      }
+    },
+    "eventBridge": {
+      "retentionDays": 30
+    }
+  },
+  "web": {
+    "s3": {
+      "versioning": true,
+      "encryption": "aws:kms",
+      "publicReadAccess": false,
+      "blockPublicAccess": true,
+      "crossRegionReplication": {
+        "enabled": true,
+        "destinationBucket": "meeting-scheduler-backup-us-west-2"
+      }
+    },
+    "cloudFront": {
+      "priceClass": "PriceClass_All",
+      "cachingEnabled": true,
+      "compressionEnabled": true,
+      "customDomain": {
+        "enabled": true,
+        "domainName": "meeting-scheduler.example.com",
+        "certificateArn": "arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID"
+      },
+      "waf": {
+        "enabled": true,
+        "webAclArn": "arn:aws:wafv2:us-east-1:ACCOUNT:global/webacl/NAME/ID"
+      }
+    }
+  },
+  "monitoring": {
+    "cloudWatch": {
+      "logRetention": 90,
+      "metricsEnabled": true,
+      "detailedMonitoring": true,
+      "customMetrics": true
+    },
+    "alarms": {
+      "enabled": true,
+      "snsNotifications": true,
+      "emailEndpoints": ["ops-team@example.com", "alerts@example.com"],
+      "slackWebhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    },
+    "xray": {
+      "enabled": true,
+      "samplingRate": 0.05
+    },
+    "dashboard": {
+      "enabled": true,
+      "widgets": ["lambda", "apigateway", "dynamodb", "errors", "latency"]
+    }
+  },
+  "security": {
+    "waf": {
+      "enabled": true,
+      "rules": [
+        "AWSManagedRulesCommonRuleSet",
+        "AWSManagedRulesKnownBadInputsRuleSet",
+        "AWSManagedRulesLinuxRuleSet",
+        "AWSManagedRulesSQLiRuleSet",
+        "AWSManagedRulesUnixRuleSet"
+      ],
+      "rateLimiting": {
+        "enabled": true,
+        "limit": 2000
+      }
+    },
+    "vpc": {
+      "enabled": true,
+      "cidr": "10.0.0.0/16",
+      "availabilityZones": 3,
+      "natGateways": 2
+    },
+    "guardDuty": {
+      "enabled": true
+    },
+    "config": {
+      "enabled": true
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "cron(0 2 * * ? *)",
+    "retentionDays": 30,
+    "crossRegionCopy": true
+  },
+  "disaster_recovery": {
+    "enabled": true,
+    "secondaryRegion": "us-west-2",
+    "rto": 4,
+    "rpo": 1
+  }
+}
