@@ -10,6 +10,7 @@ from typing import Dict, Any
 from ..tools.preference_management_tool import PreferenceManagementTool
 from ..models.preferences import Preferences
 from ..models.meeting import Meeting
+from ..utils.health_check import create_health_check_response
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         http_method = event.get('httpMethod', 'GET')
         path = event.get('path', '')
         body = json.loads(event.get('body', '{}')) if event.get('body') else {}
+        
+        # Handle health check endpoint
+        if path == '/preferences/health' and http_method == 'GET':
+            return handle_health_check()
         
         # Extract user ID from path or body
         user_id = body.get('user_id') or event.get('pathParameters', {}).get('user_id')
@@ -229,6 +234,36 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
             'body': json.dumps({
                 'error': 'Internal server error',
+                'message': str(e)
+            })
+        }
+
+
+def handle_health_check() -> Dict[str, Any]:
+    """Handle health check requests for the preferences handler."""
+    try:
+        # Perform health check without Bedrock dependency
+        health_response = create_health_check_response('preferences', include_dependencies=True)
+        
+        # Add CORS headers
+        health_response['headers'].update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        })
+        
+        return health_response
+        
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'error': 'Health check failed',
                 'message': str(e)
             })
         }

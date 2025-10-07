@@ -31,3 +31,4 @@ responses==0.24.1
 # Utilities
 python-dotenv==1.0.0
 structlog==23.2.0
+psutil==5.9.6

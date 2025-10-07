@@ -8,6 +8,7 @@ import os
 from typing import Dict, Any
 
 from ..utils.logging import create_agent_logger, AgentDecisionType, get_correlation_id
+from ..utils.health_check import create_health_check_response, publish_bedrock_usage_metrics
 from ..config.logging_config import LoggingConfig, apply_environment_config
 from ..services.agentcore_orchestrator import (
     AgentCoreOrchestrator, AgentCoreOrchestratorError
@@ -207,47 +208,6 @@ def handle_daily_learning(body: Dict[str, Any], logger) -> Dict[str, Any]:
         'preferences_updated': 3,
         'message': 'Daily learning completed'
     }
-        API Gateway response with agent execution result
-    """
-    try:
-        # Parse request
-        http_method = event.get('httpMethod', 'GET')
-        path = event.get('path', '')
-        body = json.loads(event.get('body', '{}')) if event.get('body') else {}
-        
-        # Route based on path and method
-        if path == '/agent/schedule' and http_method == 'POST':
-            return handle_intelligent_scheduling(body)
-        elif path == '/agent/conflicts' and http_method == 'POST':
-            return handle_conflict_resolution(body)
-        elif path == '/agent/optimize' and http_method == 'POST':
-            return handle_multi_step_optimization(body)
-        elif path == '/agent/availability' and http_method == 'POST':
-            return handle_availability_lookup(body)
-        elif path == '/agent/status' and http_method == 'GET':
-            return handle_execution_status(event.get('queryStringParameters', {}))
-        elif path == '/agent/stats' and http_method == 'GET':
-            return handle_orchestrator_stats()
-        else:
-            return {
-                'statusCode': 404,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Not found',
-                    'message': f'Path {path} with method {http_method} not supported'
-                })
-            }
-        
-    except Exception as e:
-        logger.error(f"Agent handler error: {str(e)}")
-        return {
-            'statusCode': 500,
-            'headers': get_cors_headers(),
-            'body': json.dumps({
-                'error': 'Internal server error',
-                'message': str(e)
-            })
-        }
 
 
 def handle_intelligent_scheduling(body: Dict[str, Any]) -> Dict[str, Any]:
@@ -526,6 +486,33 @@ def handle_orchestrator_stats() -> Dict[str, Any]:
             'headers': get_cors_headers(),
             'body': json.dumps({
                 'error': 'Internal server error',
+                'message': str(e)
+            })
+        }
+
+
+def handle_health_check() -> Dict[str, Any]:
+    """Handle health check requests for the agent handler."""
+    try:
+        # Perform comprehensive health check including Bedrock
+        health_response = create_health_check_response('agent', include_dependencies=True)
+        
+        # Add CORS headers
+        health_response['headers'].update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        })
+        
+        return health_response
+        
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': get_cors_headers(),
+            'body': json.dumps({
+                'error': 'Health check failed',
                 'message': str(e)
             })
         }

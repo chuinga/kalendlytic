@@ -324,6 +324,7 @@ def lambda_handler(event, context):
     const authResource = this.restApi.root.addResource('auth');
     authResource.addResource('login').addMethod('POST', authIntegration);
     authResource.addResource('register').addMethod('POST', authIntegration);
+    authResource.addResource('health').addMethod('GET', authIntegration);
     const profileResource = authResource.addResource('profile');
     profileResource.addMethod('GET', authIntegration);
     profileResource.addMethod('PUT', authIntegration);
@@ -331,6 +332,7 @@ def lambda_handler(event, context):
     // Connection routes
     const connectionsResource = this.restApi.root.addResource('connections');
     connectionsResource.addMethod('GET', connectionsIntegration);
+    connectionsResource.addResource('health').addMethod('GET', connectionsIntegration);
     
     const providerResource = connectionsResource.addResource('{provider}');
     providerResource.addMethod('POST', connectionsIntegration);
@@ -343,6 +345,7 @@ def lambda_handler(event, context):
     // Agent routes
     const agentResource = this.restApi.root.addResource('agent');
     agentResource.addResource('schedule').addMethod('POST', agentIntegration);
+    agentResource.addResource('health').addMethod('GET', agentIntegration);
     
     const runsResource = agentResource.addResource('runs');
     runsResource.addMethod('GET', agentIntegration);
@@ -351,6 +354,7 @@ def lambda_handler(event, context):
     // Calendar routes
     const calendarResource = this.restApi.root.addResource('calendar');
     calendarResource.addResource('availability').addMethod('GET', calendarIntegration);
+    calendarResource.addResource('health').addMethod('GET', calendarIntegration);
     
     const eventsResource = calendarResource.addResource('events');
     eventsResource.addMethod('GET', calendarIntegration);
@@ -365,6 +369,7 @@ def lambda_handler(event, context):
     const preferencesResource = this.restApi.root.addResource('preferences');
     preferencesResource.addMethod('GET', preferencesIntegration);
     preferencesResource.addMethod('PUT', preferencesIntegration);
+    preferencesResource.addResource('health').addMethod('GET', preferencesIntegration);
     
     const workingHoursResource = preferencesResource.addResource('working-hours');
     workingHoursResource.addMethod('GET', preferencesIntegration);

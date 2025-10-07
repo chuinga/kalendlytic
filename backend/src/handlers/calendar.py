@@ -10,6 +10,7 @@ from typing import Dict, Any
 
 from ..services.google_calendar import GoogleCalendarService
 from ..utils.logging import setup_logger
+from ..utils.health_check import create_health_check_response
 
 logger = setup_logger(__name__)
 
@@ -43,6 +44,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         # Initialize Google Calendar service
         google_calendar = GoogleCalendarService()
+        
+        # Handle health check endpoint
+        if path == '/calendar/health' and method == 'GET':
+            return handle_health_check()
         
         # Route requests based on path and method
         if path.startswith('/calendar/google'):
@@ -202,6 +207,36 @@ def handle_google_calendar_request(google_calendar: GoogleCalendarService, user_
             },
             'body': json.dumps({
                 'error': 'Google Calendar operation failed',
+                'message': str(e)
+            })
+        }
+
+
+def handle_health_check() -> Dict[str, Any]:
+    """Handle health check requests for the calendar handler."""
+    try:
+        # Perform health check including Bedrock for AI-powered calendar features
+        health_response = create_health_check_response('calendar', include_dependencies=True)
+        
+        # Add CORS headers
+        health_response['headers'].update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        })
+        
+        return health_response
+        
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'error': 'Health check failed',
                 'message': str(e)
             })
         }

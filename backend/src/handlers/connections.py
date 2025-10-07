@@ -13,6 +13,7 @@ from ..services.google_oauth import GoogleOAuthService
 from ..services.microsoft_oauth import MicrosoftOAuthService
 from ..services.oauth_manager import UnifiedOAuthManager
 from ..utils.logging import setup_logger
+from ..utils.health_check import create_health_check_response
 
 logger = setup_logger(__name__)
 
@@ -427,6 +428,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             response = handle_unified_connections_status(event)
         elif path == '/connections/all' and http_method == 'DELETE':
             response = handle_unified_disconnect_all(event)
+        elif path == '/connections/health' and http_method == 'GET':
+            response = handle_health_check()
         else:
             response = {
                 'statusCode': 404,
@@ -444,6 +447,36 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'headers': cors_headers,
             'body': json.dumps({
                 'error': 'Internal server error',
+                'message': str(e)
+            })
+        }
+
+
+def handle_health_check() -> Dict[str, Any]:
+    """Handle health check requests for the connections handler."""
+    try:
+        # Perform health check without Bedrock dependency
+        health_response = create_health_check_response('connections', include_dependencies=True)
+        
+        # Add CORS headers
+        health_response['headers'].update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        })
+        
+        return health_response
+        
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'error': 'Health check failed',
                 'message': str(e)
             })
         }
