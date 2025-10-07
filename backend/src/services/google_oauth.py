@@ -246,7 +246,7 @@ class GoogleOAuthService:
     
     def refresh_access_token(self, user_id: str) -> Dict[str, Any]:
         """
-        Refresh expired access token using refresh token.
+        Refresh expired access token using refresh token with enhanced error handling.
         
         Args:
             user_id: User identifier
@@ -254,6 +254,17 @@ class GoogleOAuthService:
         Returns:
             Dictionary containing new token information
         """
+        from ..utils.token_errors import (
+            TokenErrorHandler, TokenErrorContext, ExpiredRefreshTokenError,
+            InvalidTokenError, NetworkError, ProviderError, log_token_error
+        )
+        
+        context = TokenErrorContext(
+            user_id=user_id,
+            provider='google',
+            operation='refresh_access_token'
+        )
+        
         try:
             # Get current connection
             response = self.connections_table.get_item(
@@ -261,7 +272,9 @@ class GoogleOAuthService:
             )
             
             if 'Item' not in response:
-                raise Exception("Google connection not found")
+                error = InvalidTokenError(context)
+                log_token_error(error, logger)
+                raise error
             
             connection = response['Item']
             
@@ -277,44 +290,66 @@ class GoogleOAuthService:
                 'grant_type': 'refresh_token'
             }
             
-            response = requests.post(
-                'https://oauth2.googleapis.com/token',
-                data=token_data,
-                headers={'Content-Type': 'application/x-www-form-urlencoded'}
-            )
+            try:
+                response = requests.post(
+                    'https://oauth2.googleapis.com/token',
+                    data=token_data,
+                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                    timeout=30  # Add timeout for better error handling
+                )
+            except requests.exceptions.RequestException as e:
+                error = NetworkError(str(e), context)
+                log_token_error(error, logger)
+                raise error
             
             if response.status_code != 200:
                 logger.error(f"Token refresh failed: {response.text}")
-                # If refresh fails, mark connection as invalid
-                self.connections_table.update_item(
-                    Key={'pk': f"{user_id}#google"},
-                    UpdateExpression='SET #status = :status, last_refresh = :timestamp',
-                    ExpressionAttributeNames={'#status': 'status'},
-                    ExpressionAttributeValues={
-                        ':status': 'invalid',
-                        ':timestamp': datetime.utcnow().isoformat()
-                    }
+                
+                # Classify the HTTP error
+                error = TokenErrorHandler.classify_http_error(
+                    response.status_code, response.text, context
                 )
-                raise Exception("Token refresh failed - re-authorization required")
+                log_token_error(error, logger)
+                
+                # Mark connection as invalid for non-retryable errors
+                if not error.is_retryable:
+                    self.connections_table.update_item(
+                        Key={'pk': f"{user_id}#google"},
+                        UpdateExpression='SET #status = :status, last_refresh = :timestamp, last_error = :error',
+                        ExpressionAttributeNames={'#status': 'status'},
+                        ExpressionAttributeValues={
+                            ':status': 'invalid',
+                            ':timestamp': datetime.utcnow().isoformat(),
+                            ':error': error.message
+                        }
+                    )
+                
+                raise error
             
             token_response = response.json()
             
             # Update connection with new token
-            update_expression = 'SET access_token_encrypted = :access_token, expires_at = :expires_at, last_refresh = :timestamp'
+            update_expression = 'SET access_token_encrypted = :access_token, expires_at = :expires_at, last_refresh = :timestamp, #status = :status'
             expression_values = {
                 ':access_token': encrypt_token(token_response['access_token']),
                 ':expires_at': (datetime.utcnow() + timedelta(seconds=token_response['expires_in'])).isoformat(),
-                ':timestamp': datetime.utcnow().isoformat()
+                ':timestamp': datetime.utcnow().isoformat(),
+                ':status': 'active'
             }
+            expression_names = {'#status': 'status'}
             
             # Update refresh token if provided
             if 'refresh_token' in token_response:
                 update_expression += ', refresh_token_encrypted = :refresh_token'
                 expression_values[':refresh_token'] = encrypt_token(token_response['refresh_token'])
             
+            # Clear any previous error
+            update_expression += ' REMOVE last_error'
+            
             self.connections_table.update_item(
                 Key={'pk': f"{user_id}#google"},
                 UpdateExpression=update_expression,
+                ExpressionAttributeNames=expression_names,
                 ExpressionAttributeValues=expression_values
             )
             
@@ -326,8 +361,12 @@ class GoogleOAuthService:
             }
             
         except Exception as e:
-            logger.error(f"Token refresh failed: {str(e)}")
-            raise Exception(f"Token refresh failed: {str(e)}")
+            if not hasattr(e, 'error_code'):  # Not already a TokenError
+                error = TokenErrorHandler.classify_exception(e, context)
+                log_token_error(error, logger)
+                raise error
+            else:
+                raise e
     
     def get_valid_credentials(self, user_id: str) -> Credentials:
         """
