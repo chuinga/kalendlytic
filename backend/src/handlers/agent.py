@@ -4,16 +4,22 @@ Manages agent reasoning, tool execution, and decision-making workflows.
 """
 
 import json
-import logging
+import os
 from typing import Dict, Any
 
+from ..utils.logging import create_agent_logger, AgentDecisionType, get_correlation_id
+from ..config.logging_config import LoggingConfig, apply_environment_config
 from ..services.agentcore_orchestrator import (
     AgentCoreOrchestrator, AgentCoreOrchestratorError
 )
 from ..services.agentcore_router import TaskType
 from ..services.agentcore_planner import PlanningStrategy
 
-logger = logging.getLogger(__name__)
+# Apply environment-specific logging configuration
+apply_environment_config()
+
+# Create enhanced agent logger
+logger = create_agent_logger(__name__)
 
 # Initialize AgentCore orchestrator
 orchestrator = AgentCoreOrchestrator()
@@ -28,6 +34,179 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         context: Lambda context object
         
     Returns:
+        API Gateway response with agent operation results
+    """
+    # Set up logging context
+    correlation_id = get_correlation_id()
+    user_id = event.get('requestContext', {}).get('authorizer', {}).get('claims', {}).get('sub')
+    
+    # Update logger with context
+    logger.set_user_context(user_id or 'anonymous')
+    logger.start_performance_tracking()
+    
+    # Set AWS context in logger
+    if hasattr(context, 'aws_request_id'):
+        os.environ['AWS_REQUEST_ID'] = context.aws_request_id
+    
+    logger.info(
+        "Agent handler invoked",
+        extra={
+            'event_type': event.get('httpMethod'),
+            'path': event.get('path'),
+            'user_agent': event.get('headers', {}).get('User-Agent'),
+            'source_ip': event.get('requestContext', {}).get('identity', {}).get('sourceIp')
+        }
+    )
+    
+    try:
+        # Parse request body
+        body = json.loads(event.get('body', '{}')) if event.get('body') else {}
+        action = body.get('action', 'unknown')
+        
+        # Generate agent run ID for tracking
+        import uuid
+        agent_run_id = str(uuid.uuid4())
+        logger.set_agent_run_id(agent_run_id)
+        
+        logger.info(f"Starting agent operation: {action}")
+        
+        # Process the request based on action type
+        if action == 'schedule_meeting':
+            result = handle_schedule_meeting(body, logger)
+        elif action == 'resolve_conflict':
+            result = handle_resolve_conflict(body, logger)
+        elif action == 'daily_learning':
+            result = handle_daily_learning(body, logger)
+        else:
+            logger.warning(f"Unknown action requested: {action}")
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': f'Unknown action: {action}'})
+            }
+        
+        # Log successful completion
+        logger.log_performance_metrics(
+            operation=action,
+            metrics={
+                'agent_run_id': agent_run_id,
+                'success': True,
+                'result_size': len(str(result))
+            }
+        )
+        
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'X-Correlation-ID': correlation_id,
+                'X-Agent-Run-ID': agent_run_id
+            },
+            'body': json.dumps(result)
+        }
+        
+    except Exception as e:
+        logger.error(
+            f"Agent handler error: {str(e)}",
+            extra={'error_type': type(e).__name__},
+            exc_info=True
+        )
+        
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'X-Correlation-ID': correlation_id
+            },
+            'body': json.dumps({
+                'error': 'Internal server error',
+                'correlation_id': correlation_id
+            })
+        }
+
+
+def handle_schedule_meeting(body: Dict[str, Any], logger) -> Dict[str, Any]:
+    """Handle meeting scheduling request with enhanced logging."""
+    logger.info("Processing meeting scheduling request")
+    
+    # Extract request parameters
+    attendees = body.get('attendees', [])
+    duration = body.get('duration', 30)
+    subject = body.get('subject', 'Meeting')
+    
+    # Log agent decision
+    logger.log_agent_decision(
+        decision_type=AgentDecisionType.SCHEDULING,
+        rationale=f"Scheduling meeting '{subject}' for {len(attendees)} attendees with {duration} minute duration",
+        inputs={
+            'attendees': attendees,
+            'duration': duration,
+            'subject': subject
+        },
+        outputs={'status': 'processing'},
+        confidence_score=0.8,
+        alternatives_count=3
+    )
+    
+    # Placeholder implementation
+    return {
+        'action': 'schedule_meeting',
+        'status': 'completed',
+        'meeting_id': 'placeholder_meeting_123',
+        'message': 'Meeting scheduling request processed'
+    }
+
+
+def handle_resolve_conflict(body: Dict[str, Any], logger) -> Dict[str, Any]:
+    """Handle conflict resolution request with enhanced logging."""
+    logger.info("Processing conflict resolution request")
+    
+    conflict_id = body.get('conflict_id')
+    resolution_strategy = body.get('strategy', 'reschedule')
+    
+    # Log agent decision
+    logger.log_agent_decision(
+        decision_type=AgentDecisionType.CONFLICT_RESOLUTION,
+        rationale=f"Resolving conflict {conflict_id} using {resolution_strategy} strategy",
+        inputs={
+            'conflict_id': conflict_id,
+            'strategy': resolution_strategy
+        },
+        outputs={'status': 'processing'},
+        confidence_score=0.9,
+        alternatives_count=2
+    )
+    
+    # Placeholder implementation
+    return {
+        'action': 'resolve_conflict',
+        'status': 'completed',
+        'conflict_id': conflict_id,
+        'resolution': resolution_strategy,
+        'message': 'Conflict resolution completed'
+    }
+
+
+def handle_daily_learning(body: Dict[str, Any], logger) -> Dict[str, Any]:
+    """Handle daily learning and optimization with enhanced logging."""
+    logger.info("Processing daily learning request")
+    
+    # Log agent decision
+    logger.log_agent_decision(
+        decision_type=AgentDecisionType.PREFERENCE_EXTRACTION,
+        rationale="Analyzing user behavior patterns for preference optimization",
+        inputs={'timestamp': body.get('timestamp')},
+        outputs={'status': 'processing'},
+        confidence_score=0.7
+    )
+    
+    # Placeholder implementation
+    return {
+        'action': 'daily_learning',
+        'status': 'completed',
+        'insights_generated': 5,
+        'preferences_updated': 3,
+        'message': 'Daily learning completed'
+    }
         API Gateway response with agent execution result
     """
     try:

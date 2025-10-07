@@ -54,6 +54,13 @@ export class ApiStack extends cdk.Stack {
       AGENT_RUNS_TABLE: 'meeting-agent-runs',
       AUDIT_LOGS_TABLE: 'meeting-agent-audit-logs',
       REGION: this.region,
+      // Logging configuration
+      LOG_LEVEL: 'INFO',
+      ENVIRONMENT: 'dev',
+      LOG_GROUP_PREFIX: '/aws/lambda/meeting-agent',
+      AGENT_DECISION_LOG_GROUP: '/aws/lambda/meeting-agent-agent-decisions',
+      PII_REDACTION_ENABLED: 'true',
+      PERFORMANCE_LOGGING_ENABLED: 'true',
     };
 
     // Common Lambda configuration
