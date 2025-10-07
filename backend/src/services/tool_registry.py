@@ -10,8 +10,10 @@ from .agentcore_tool_invocation import AgentCoreToolInvocation
 from ..tools.availability_tool import AvailabilityTool, AvailabilityRequest
 from ..tools.event_management_tool import EventManagementTool, EventRequest, RescheduleRequest
 from ..tools.email_communication_tool import EmailCommunicationTool, EmailRequest, EmailType
+from ..tools.preference_management_tool import PreferenceManagementTool
 from ..models.connection import Connection
 from ..models.preferences import Preferences
+from ..models.meeting import Meeting
 from ..utils.logging import setup_logger
 
 logger = setup_logger(__name__)
@@ -33,6 +35,7 @@ class ToolRegistry:
         self.availability_tool = AvailabilityTool()
         self.event_management_tool = EventManagementTool()
         self.email_communication_tool = EmailCommunicationTool()
+        self.preference_management_tool = PreferenceManagementTool()
         
         # Register all tools
         self._register_all_tools()
@@ -48,6 +51,9 @@ class ToolRegistry:
             
             # Register email communication tool
             self._register_email_communication_tool()
+            
+            # Register preference management tool
+            self._register_preference_management_tool()
             
             logger.info("All tools registered successfully")
             
@@ -272,6 +278,133 @@ class ToolRegistry:
             logger.error(f"Failed to register email communication tool: {str(e)}")
             raise
     
+    def _register_preference_management_tool(self) -> None:
+        """Register the preference management tool with AgentCore."""
+        try:
+            # Get the tool schema from the preference management tool
+            tool_schema = self.preference_management_tool.get_tool_schema()
+            
+            # Create wrapper function for AgentCore integration
+            def preference_management_tool_wrapper(inputs: Dict[str, Any]) -> Dict[str, Any]:
+                """Wrapper function for preference management tool execution."""
+                try:
+                    action = inputs.get('action')
+                    user_id = inputs.get('user_id')
+                    
+                    if action == "extract_preferences":
+                        natural_language_input = inputs.get('natural_language_input', '')
+                        result = self.preference_management_tool.extract_preferences(natural_language_input, user_id)
+                        
+                        return {
+                            "success": True,
+                            "extraction_result": {
+                                "working_hours": {day: {'start': wh.start, 'end': wh.end} 
+                                                for day, wh in result.working_hours.items()},
+                                "buffer_minutes": result.buffer_minutes,
+                                "focus_blocks": [
+                                    {
+                                        "day": fb.day,
+                                        "start": fb.start,
+                                        "end": fb.end,
+                                        "title": fb.title
+                                    } for fb in result.focus_blocks
+                                ],
+                                "vip_contacts": result.vip_contacts,
+                                "meeting_types": {name: {
+                                    "duration": mt.duration,
+                                    "priority": mt.priority,
+                                    "buffer_before": mt.buffer_before,
+                                    "buffer_after": mt.buffer_after
+                                } for name, mt in result.meeting_types.items()},
+                                "confidence_score": result.confidence_score
+                            }
+                        }
+                    
+                    elif action == "retrieve_preferences":
+                        preferences = self.preference_management_tool.retrieve_preferences(user_id)
+                        if preferences:
+                            return {
+                                "success": True,
+                                "preferences": preferences.dict()
+                            }
+                        else:
+                            return {
+                                "success": False,
+                                "error": "No preferences found for user"
+                            }
+                    
+                    elif action == "store_preferences":
+                        preferences_data = inputs.get('preferences_data', {})
+                        from ..models.preferences import Preferences
+                        preferences = Preferences(pk=f"user#{user_id}", **preferences_data)
+                        success = self.preference_management_tool.store_preferences(user_id, preferences)
+                        
+                        return {
+                            "success": success,
+                            "message": "Preferences stored successfully" if success else "Failed to store preferences"
+                        }
+                    
+                    elif action == "evaluate_priority":
+                        meeting_data = inputs.get('meeting_data', {})
+                        preferences = self.preference_management_tool.retrieve_preferences(user_id)
+                        
+                        if not preferences:
+                            return {
+                                "success": False,
+                                "error": "User preferences not found"
+                            }
+                        
+                        meeting = Meeting(**meeting_data)
+                        priority_score = self.preference_management_tool.evaluate_meeting_priority(meeting, preferences, user_id)
+                        
+                        return {
+                            "success": True,
+                            "priority_score": {
+                                "meeting_id": priority_score.meeting_id,
+                                "priority_score": priority_score.priority_score,
+                                "priority_factors": priority_score.priority_factors,
+                                "is_vip_meeting": priority_score.is_vip_meeting,
+                                "meeting_type": priority_score.meeting_type,
+                                "reasoning": priority_score.reasoning
+                            }
+                        }
+                    
+                    elif action == "update_from_feedback":
+                        meeting_id = inputs.get('meeting_id', '')
+                        feedback = inputs.get('feedback', '')
+                        success = self.preference_management_tool.update_preferences_from_feedback(user_id, meeting_id, feedback)
+                        
+                        return {
+                            "success": success,
+                            "message": "Feedback processed successfully" if success else "Failed to process feedback"
+                        }
+                    
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Unknown action: {action}"
+                        }
+                    
+                except Exception as e:
+                    logger.error(f"Preference management tool execution failed: {str(e)}")
+                    return {
+                        "success": False,
+                        "error": str(e)
+                    }
+            
+            # Register the tool function
+            self.tool_invocation.register_tool(
+                tool_name="manage_preferences",
+                tool_function=preference_management_tool_wrapper,
+                schema=tool_schema
+            )
+            
+            logger.info("Preference management tool registered successfully")
+                
+        except Exception as e:
+            logger.error(f"Failed to register preference management tool: {str(e)}")
+            raise
+    
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
         return list(self.tool_invocation.registered_tools.keys())
@@ -444,6 +577,51 @@ class ToolRegistry:
             
         except Exception as e:
             logger.error(f"Failed to execute email communication tool: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "data": None
+            }
+    
+    def execute_preference_management_tool(self, 
+                                         action: str,
+                                         user_id: str,
+                                         **kwargs) -> Dict[str, Any]:
+        """
+        Execute the preference management tool with proper context.
+        
+        Args:
+            action: Preference management action (extract_preferences, store_preferences, etc.)
+            user_id: User identifier
+            **kwargs: Additional parameters specific to the action
+            
+        Returns:
+            Tool execution result
+        """
+        try:
+            # Prepare parameters
+            parameters = {
+                "action": action,
+                "user_id": user_id,
+                **kwargs
+            }
+            
+            # Execute through AgentCore
+            result = self.tool_invocation.invoke_tool(
+                tool_name="manage_preferences",
+                inputs=parameters
+            )
+            
+            return {
+                "success": result.success,
+                "data": result.data,
+                "error": result.error,
+                "execution_time_ms": result.execution_time_ms,
+                "retry_count": result.retry_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to execute preference management tool: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
