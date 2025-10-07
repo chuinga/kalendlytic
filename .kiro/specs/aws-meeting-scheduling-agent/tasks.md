@@ -95,7 +95,6 @@
 
 - [x] 5.2 Implement AgentCore Router/Planner primitive
 
-
   - Create AgentCore router to determine optimal tool execution sequence
   - Implement planning logic for complex scheduling scenarios
 
@@ -103,7 +102,8 @@
   - Create context management for multi-step agent operations
   - _Requirements: 1.2, 1.4_
 
-- [ ] 5.3 Implement AgentCore Tool Invocation primitive
+- [x] 5.3 Implement AgentCore Tool Invocation primitive
+
 
   - Create schema-validated tool interfaces for all agent operations
   - Implement safe tool execution with input validation and error handling
