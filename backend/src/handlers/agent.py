@@ -78,6 +78,14 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             result = handle_resolve_conflict(body, logger)
         elif action == 'daily_learning':
             result = handle_daily_learning(body, logger)
+        elif action == 'intelligent_scheduling':
+            result = handle_intelligent_scheduling(body)
+        elif action == 'conflict_resolution':
+            result = handle_conflict_resolution(body)
+        elif action == 'availability_lookup':
+            result = handle_availability_lookup(body)
+        elif action == 'multi_step_optimization':
+            result = handle_multi_step_optimization(body)
         else:
             logger.warning(f"Unknown action requested: {action}")
             return {
@@ -222,12 +230,8 @@ def handle_intelligent_scheduling(body: Dict[str, Any]) -> Dict[str, Any]:
         
         if not user_id:
             return {
-                'statusCode': 400,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Bad request',
-                    'message': 'user_id is required'
-                })
+                'error': 'Bad request',
+                'message': 'user_id is required'
             }
         
         # Convert string parameters to enums
@@ -236,12 +240,8 @@ def handle_intelligent_scheduling(body: Dict[str, Any]) -> Dict[str, Any]:
             planning_strategy = PlanningStrategy(strategy_str)
         except ValueError as e:
             return {
-                'statusCode': 400,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Bad request',
-                    'message': f'Invalid parameter: {str(e)}'
-                })
+                'error': 'Bad request',
+                'message': f'Invalid parameter: {str(e)}'
             }
         
         # Execute intelligent scheduling
@@ -253,21 +253,13 @@ def handle_intelligent_scheduling(body: Dict[str, Any]) -> Dict[str, Any]:
             planning_strategy=planning_strategy
         )
         
-        return {
-            'statusCode': 200,
-            'headers': get_cors_headers(),
-            'body': json.dumps(result)
-        }
+        return result
         
     except AgentCoreOrchestratorError as e:
         logger.error(f"AgentCore orchestrator error: {e}")
         return {
-            'statusCode': 422,
-            'headers': get_cors_headers(),
-            'body': json.dumps({
-                'error': 'Processing error',
-                'message': str(e)
-            })
+            'error': 'Processing error',
+            'message': str(e)
         }
 
 
@@ -280,12 +272,8 @@ def handle_conflict_resolution(body: Dict[str, Any]) -> Dict[str, Any]:
         
         if not context_id:
             return {
-                'statusCode': 400,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Bad request',
-                    'message': 'context_id is required'
-                })
+                'error': 'Bad request',
+                'message': 'context_id is required'
             }
         
         # Handle complex conflicts
@@ -295,21 +283,13 @@ def handle_conflict_resolution(body: Dict[str, Any]) -> Dict[str, Any]:
             available_alternatives=alternatives
         )
         
-        return {
-            'statusCode': 200,
-            'headers': get_cors_headers(),
-            'body': json.dumps(result)
-        }
+        return result
         
     except AgentCoreOrchestratorError as e:
         logger.error(f"Conflict resolution error: {e}")
         return {
-            'statusCode': 422,
-            'headers': get_cors_headers(),
-            'body': json.dumps({
-                'error': 'Processing error',
-                'message': str(e)
-            })
+            'error': 'Processing error',
+            'message': str(e)
         }
 
 
@@ -322,12 +302,8 @@ def handle_multi_step_optimization(body: Dict[str, Any]) -> Dict[str, Any]:
         
         if not user_id or not operations:
             return {
-                'statusCode': 400,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Bad request',
-                    'message': 'user_id and operations are required'
-                })
+                'error': 'Bad request',
+                'message': 'user_id and operations are required'
             }
         
         # Optimize multi-step operation
@@ -337,21 +313,13 @@ def handle_multi_step_optimization(body: Dict[str, Any]) -> Dict[str, Any]:
             optimization_goals=optimization_goals
         )
         
-        return {
-            'statusCode': 200,
-            'headers': get_cors_headers(),
-            'body': json.dumps(result)
-        }
+        return result
         
     except AgentCoreOrchestratorError as e:
         logger.error(f"Multi-step optimization error: {e}")
         return {
-            'statusCode': 422,
-            'headers': get_cors_headers(),
-            'body': json.dumps({
-                'error': 'Processing error',
-                'message': str(e)
-            })
+            'error': 'Processing error',
+            'message': str(e)
         }
 
 
@@ -405,12 +373,8 @@ def handle_availability_lookup(body: Dict[str, Any]) -> Dict[str, Any]:
         
         if not all([user_id, start_date_str, end_date_str]):
             return {
-                'statusCode': 400,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Bad request',
-                    'message': 'user_id, start_date, and end_date are required'
-                })
+                'error': 'Bad request',
+                'message': 'user_id, start_date, and end_date are required'
             }
         
         # Parse dates
@@ -419,12 +383,8 @@ def handle_availability_lookup(body: Dict[str, Any]) -> Dict[str, Any]:
             end_date = datetime.fromisoformat(end_date_str.replace('Z', '+00:00'))
         except ValueError as e:
             return {
-                'statusCode': 400,
-                'headers': get_cors_headers(),
-                'body': json.dumps({
-                    'error': 'Bad request',
-                    'message': f'Invalid date format: {str(e)}'
-                })
+                'error': 'Bad request',
+                'message': f'Invalid date format: {str(e)}'
             }
         
         # Extract optional parameters
@@ -450,21 +410,13 @@ def handle_availability_lookup(body: Dict[str, Any]) -> Dict[str, Any]:
             working_hours_only=working_hours_only
         )
         
-        return {
-            'statusCode': 200,
-            'headers': get_cors_headers(),
-            'body': json.dumps(result)
-        }
+        return result
         
     except Exception as e:
         logger.error(f"Availability lookup error: {e}")
         return {
-            'statusCode': 500,
-            'headers': get_cors_headers(),
-            'body': json.dumps({
-                'error': 'Internal server error',
-                'message': str(e)
-            })
+            'error': 'Internal server error',
+            'message': str(e)
         }
 
 
