@@ -414,9 +414,9 @@ class TokenRefreshService:
             'error_message': str(last_error),
             'attempt_number': self.max_retries,
             'correlation_id': correlation_id
-        }    
-  
-  async def _update_health_metrics(self, user_id: str, provider: str, 
+        }
+    
+    async def _update_health_metrics(self, user_id: str, provider: str, 
                                    success: bool, refresh_time: float) -> None:
         """
         Update token health metrics for monitoring and alerting.

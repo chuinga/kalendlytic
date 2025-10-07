@@ -33,7 +33,8 @@
   - Implement deployment pipeline for frontend assets
   - _Requirements: 9.6_
 
-- [ ] 3. Implement OAuth integration and token management
+- [x] 3. Implement OAuth integration and token management
+
 - [x] 3.1 Create Google OAuth flow implementation
 
   - Write Python code for Google OAuth 2.0 authorization flow with PKCE
@@ -52,14 +53,14 @@
 
 - [x] 3.3 Implement token refresh and error handling
 
-
   - Create automatic token refresh logic with exponential backoff
   - Implement error handling for expired, invalid, or revoked tokens
   - Add monitoring and alerting for token refresh failures
   - _Requirements: 2.6, 7.5_
 
 - [ ] 4. Build calendar integration and availability aggregation
-- [ ] 4.1 Create Google Calendar API integration
+- [x] 4.1 Create Google Calendar API integration
+
 
   - Write Python functions to fetch calendar events from Google Calendar API
   - Implement event creation, modification, and deletion operations
