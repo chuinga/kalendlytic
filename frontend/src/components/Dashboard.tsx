@@ -1,14 +1,23 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { Calendar, Settings, Link, Activity, User, LogOut } from 'lucide-react'
+import { Calendar, Settings, Link, Activity, User, LogOut, Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { ConnectionStatus } from '@/components/connections/ConnectionStatus'
 import { ConnectionsPage } from '@/components/connections/ConnectionsPage'
+import { AvailabilityTimeline, ConflictResolver, MeetingScheduler, AgentActionReview } from '@/components/calendar'
+import { CalendarViewMode, SchedulingConflict, MeetingRequest, AgentAction } from '@/types/calendar'
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [showMeetingScheduler, setShowMeetingScheduler] = useState(false)
+  const [viewMode, setViewMode] = useState<CalendarViewMode>({
+    type: 'week',
+    date: new Date().toISOString().split('T')[0]
+  })
+  const [conflicts, setConflicts] = useState<SchedulingConflict[]>([])
+  const [refreshingConflicts, setRefreshingConflicts] = useState(false)
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Calendar },
@@ -16,6 +25,102 @@ export default function Dashboard() {
     { id: 'preferences', label: 'Preferences', icon: Settings },
     { id: 'logs', label: 'Agent Logs', icon: Activity },
   ]
+
+  // Handler functions for calendar operations
+  const handleScheduleMeeting = async (request: MeetingRequest) => {
+    try {
+      const response = await fetch('/api/calendar/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to schedule meeting')
+      }
+      
+      // Refresh conflicts after scheduling
+      await handleRefreshConflicts()
+    } catch (error) {
+      console.error('Failed to schedule meeting:', error)
+      throw error
+    }
+  }
+
+  const handleResolveConflict = async (conflictId: string, resolutionId: string) => {
+    try {
+      const response = await fetch(`/api/calendar/conflicts/${conflictId}/resolve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolutionId })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to resolve conflict')
+      }
+      
+      // Remove resolved conflict from state
+      setConflicts(prev => prev.filter(c => c.id !== conflictId))
+    } catch (error) {
+      console.error('Failed to resolve conflict:', error)
+      throw error
+    }
+  }
+
+  const handleDismissConflict = (conflictId: string) => {
+    setConflicts(prev => prev.filter(c => c.id !== conflictId))
+  }
+
+  const handleRefreshConflicts = async () => {
+    try {
+      setRefreshingConflicts(true)
+      const response = await fetch('/api/calendar/conflicts')
+      if (response.ok) {
+        const conflictsData = await response.json()
+        setConflicts(conflictsData)
+      }
+    } catch (error) {
+      console.error('Failed to refresh conflicts:', error)
+    } finally {
+      setRefreshingConflicts(false)
+    }
+  }
+
+  const handleApproveAction = async (actionId: string) => {
+    try {
+      const response = await fetch(`/api/agent/actions/${actionId}/approve`, {
+        method: 'POST'
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to approve action')
+      }
+    } catch (error) {
+      console.error('Failed to approve action:', error)
+      throw error
+    }
+  }
+
+  const handleRejectAction = async (actionId: string, feedback?: string) => {
+    try {
+      const response = await fetch(`/api/agent/actions/${actionId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedback })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to reject action')
+      }
+    } catch (error) {
+      console.error('Failed to reject action:', error)
+      throw error
+    }
+  }
+
+  const handleRefreshActions = async () => {
+    // This will be handled by the AgentActionReview component
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,15 +189,59 @@ export default function Dashboard() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow">
           {activeTab === 'dashboard' && (
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Calendar Dashboard
-              </h2>
-              <p className="text-gray-600">
-                Dashboard functionality will be implemented in task 8.3
-              </p>
+            <div className="p-6 space-y-8">
+              {/* Dashboard Header with Actions */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Calendar Dashboard
+                </h2>
+                <button
+                  onClick={() => setShowMeetingScheduler(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Schedule Meeting</span>
+                </button>
+              </div>
+
+              {/* Conflicts Section */}
+              {conflicts.length > 0 && (
+                <div className="border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg">
+                  <ConflictResolver
+                    conflicts={conflicts}
+                    onResolveConflict={handleResolveConflict}
+                    onDismissConflict={handleDismissConflict}
+                    onRefreshConflicts={handleRefreshConflicts}
+                  />
+                </div>
+              )}
+
+              {/* Calendar Timeline */}
+              <div>
+                <AvailabilityTimeline
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  onTimeSlotClick={(slot) => {
+                    // Could open meeting scheduler with pre-selected time
+                    console.log('Time slot clicked:', slot)
+                  }}
+                  onEventClick={(event) => {
+                    // Could open event details modal
+                    console.log('Event clicked:', event)
+                  }}
+                />
+              </div>
+
+              {/* Agent Actions Review */}
+              <div className="border-t pt-8">
+                <AgentActionReview
+                  onApproveAction={handleApproveAction}
+                  onRejectAction={handleRejectAction}
+                  onRefreshActions={handleRefreshActions}
+                />
+              </div>
             </div>
           )}
 
@@ -103,7 +252,7 @@ export default function Dashboard() {
           )}
 
           {activeTab === 'preferences' && (
-            <div>
+            <div className="p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
                 Preferences & Settings
               </h2>
@@ -114,7 +263,7 @@ export default function Dashboard() {
           )}
 
           {activeTab === 'logs' && (
-            <div>
+            <div className="p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
                 Agent Decision Logs
               </h2>
@@ -124,6 +273,18 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Meeting Scheduler Modal */}
+        {showMeetingScheduler && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <MeetingScheduler
+                onScheduleMeeting={handleScheduleMeeting}
+                onClose={() => setShowMeetingScheduler(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

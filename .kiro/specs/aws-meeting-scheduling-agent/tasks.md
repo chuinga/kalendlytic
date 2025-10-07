@@ -176,14 +176,14 @@
 
 - [x] 8.2 Create OAuth connection interface
 
-
   - Build Google OAuth connection flow with proper scopes
   - Build Microsoft OAuth connection flow with Graph API scopes
   - Create connection status monitoring and health check displays
   - Add connection management (disconnect, reconnect) functionality
   - _Requirements: 2.1, 2.2, 8.3_
 
-- [ ] 8.3 Create dashboard and calendar views
+- [x] 8.3 Create dashboard and calendar views
+
 
   - Implement unified availability timeline component
   - Create conflict detection and resolution interface
