@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Amplify } from 'aws-amplify'
-import { Authenticator } from '@aws-amplify/ui-react'
+import { AuthProvider } from '@/contexts/AuthContext'
 import '@aws-amplify/ui-react/styles.css'
 import '../styles/globals.css'
 
@@ -11,13 +11,20 @@ const amplifyConfig = {
     Cognito: {
       userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '',
       userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID || '',
+      identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID || '',
       loginWith: {
         email: true,
       },
-      signUpVerificationMethod: 'code',
+      signUpVerificationMethod: 'code' as const,
       userAttributes: {
         email: {
           required: true,
+        },
+        name: {
+          required: true,
+        },
+        'custom:timezone': {
+          required: false,
         },
       },
       allowGuestAccess: false,
@@ -40,6 +47,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 })
@@ -47,9 +55,9 @@ const queryClient = new QueryClient({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <Authenticator.Provider>
+      <AuthProvider>
         <Component {...pageProps} />
-      </Authenticator.Provider>
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

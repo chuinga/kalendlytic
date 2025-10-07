@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { Calendar, Settings, Link, Activity } from 'lucide-react'
+import { useRouter } from 'next/router'
+import { Calendar, Settings, Link, Activity, User, LogOut } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
-interface DashboardProps {
-  user: any
-  signOut: () => void
-}
-
-export default function Dashboard({ user, signOut }: DashboardProps) {
+export default function Dashboard() {
+  const { user, logout } = useAuth()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
 
   const tabs = [
@@ -29,13 +28,28 @@ export default function Dashboard({ user, signOut }: DashboardProps) {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
-                Welcome, {user?.attributes?.email}
+                Welcome, {user?.email || user?.attributes?.email}
               </span>
               <button
-                onClick={signOut}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                onClick={() => router.push('/profile')}
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition duration-200"
               >
-                Sign Out
+                <User className="h-4 w-4" />
+                <span>Profile</span>
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await logout()
+                    router.push('/login')
+                  } catch (error) {
+                    console.error('Logout failed:', error)
+                  }
+                }}
+                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
