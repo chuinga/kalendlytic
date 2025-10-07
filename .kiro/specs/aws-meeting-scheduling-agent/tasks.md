@@ -114,14 +114,14 @@
 - [ ] 6. Build agent tools for calendar and email operations
 - [x] 6.1 Create availability tool
 
-
   - Implement get_availability function with date range and attendee filtering
   - Add constraint handling for working hours and buffer times
   - Create time slot ranking algorithm based on user preferences
   - Integrate with unified calendar availability service
   - _Requirements: 3.1, 6.1, 6.5_
 
-- [ ] 6.2 Create event management tool
+- [x] 6.2 Create event management tool
+
 
   - Implement create_event function with video conferencing integration
   - Add reschedule_event function with conflict resolution logic

@@ -8,6 +8,7 @@ from typing import Dict, List, Any, Optional
 
 from .agentcore_tool_invocation import AgentCoreToolInvocation
 from ..tools.availability_tool import AvailabilityTool, AvailabilityRequest
+from ..tools.event_management_tool import EventManagementTool, EventRequest, RescheduleRequest
 from ..models.connection import Connection
 from ..models.preferences import Preferences
 from ..utils.logging import setup_logger
@@ -29,6 +30,7 @@ class ToolRegistry:
         """
         self.tool_invocation = tool_invocation_service
         self.availability_tool = AvailabilityTool()
+        self.event_management_tool = EventManagementTool()
         
         # Register all tools
         self._register_all_tools()
@@ -38,6 +40,9 @@ class ToolRegistry:
         try:
             # Register availability tool
             self._register_availability_tool()
+            
+            # Register event management tool
+            self._register_event_management_tool()
             
             logger.info("All tools registered successfully")
             
@@ -96,6 +101,105 @@ class ToolRegistry:
                 
         except Exception as e:
             logger.error(f"Failed to register availability tool: {str(e)}")
+            raise
+    
+    def _register_event_management_tool(self) -> None:
+        """Register the event management tool with AgentCore."""
+        try:
+            # Get the tool schema from the event management tool
+            tool_schema = self.event_management_tool.get_tool_schema()
+            
+            # Create wrapper function for AgentCore integration
+            def event_management_tool_wrapper(inputs: Dict[str, Any]) -> Dict[str, Any]:
+                """Wrapper function for event management tool execution."""
+                try:
+                    action = inputs.get('action')
+                    user_id = inputs.get('user_id')
+                    connections = inputs.get('connections', [])
+                    preferences = inputs.get('preferences')
+                    
+                    if action == "create":
+                        event_data = inputs.get('event_data', {})
+                        request = EventRequest(
+                            user_id=user_id,
+                            title=event_data.get('title', ''),
+                            start=event_data.get('start'),
+                            end=event_data.get('end'),
+                            attendees=event_data.get('attendees'),
+                            description=event_data.get('description', ''),
+                            location=event_data.get('location', ''),
+                            conference_provider=event_data.get('conference_provider', 'none'),
+                            timezone=event_data.get('timezone', 'UTC'),
+                            send_notifications=event_data.get('send_notifications', True)
+                        )
+                        result = self.event_management_tool.create_event(request, connections, preferences)
+                        
+                    elif action == "reschedule":
+                        event_id = inputs.get('event_id')
+                        new_start = inputs.get('new_start')
+                        new_end = inputs.get('new_end')
+                        conflict_resolution = inputs.get('conflict_resolution', 'find_alternative')
+                        
+                        request = RescheduleRequest(
+                            user_id=user_id,
+                            event_id=event_id,
+                            new_start=new_start,
+                            new_end=new_end,
+                            conflict_resolution=conflict_resolution
+                        )
+                        result = self.event_management_tool.reschedule_event(request, connections, preferences)
+                        
+                    elif action == "modify":
+                        event_id = inputs.get('event_id')
+                        modifications = inputs.get('modifications', {})
+                        result = self.event_management_tool.modify_event(
+                            user_id, event_id, modifications, connections, preferences
+                        )
+                        
+                    elif action == "cancel":
+                        event_id = inputs.get('event_id')
+                        send_notifications = inputs.get('send_notifications', True)
+                        cancellation_reason = inputs.get('cancellation_reason', '')
+                        result = self.event_management_tool.cancel_event(
+                            user_id, event_id, connections, send_notifications, cancellation_reason
+                        )
+                        
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Unknown action: {action}"
+                        }
+                    
+                    return {
+                        "success": result.success,
+                        "event_id": result.event_id,
+                        "event_data": result.event_data,
+                        "conflicts": result.conflicts,
+                        "alternatives": result.alternatives,
+                        "conference_url": result.conference_url,
+                        "html_link": result.html_link,
+                        "error_message": result.error_message,
+                        "execution_time_ms": result.execution_time_ms
+                    }
+                    
+                except Exception as e:
+                    logger.error(f"Event management tool execution failed: {str(e)}")
+                    return {
+                        "success": False,
+                        "error": str(e)
+                    }
+            
+            # Register the tool function with a default schema
+            self.tool_invocation.register_tool(
+                tool_name="manage_events",
+                tool_function=event_management_tool_wrapper,
+                schema=tool_schema
+            )
+            
+            logger.info("Event management tool registered successfully")
+                
+        except Exception as e:
+            logger.error(f"Failed to register event management tool: {str(e)}")
             raise
     
     def get_available_tools(self) -> List[str]:
@@ -165,6 +269,57 @@ class ToolRegistry:
             
         except Exception as e:
             logger.error(f"Failed to execute availability tool: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "data": None
+            }
+    
+    def execute_event_management_tool(self, 
+                                    action: str,
+                                    user_id: str,
+                                    connections: List[Connection],
+                                    preferences: Optional[Preferences] = None,
+                                    **kwargs) -> Dict[str, Any]:
+        """
+        Execute the event management tool with proper context.
+        
+        Args:
+            action: Event management action (create, reschedule, modify, cancel)
+            user_id: User identifier
+            connections: Active calendar connections
+            preferences: User preferences
+            **kwargs: Additional parameters specific to the action
+            
+        Returns:
+            Tool execution result
+        """
+        try:
+            # Prepare parameters
+            parameters = {
+                "action": action,
+                "user_id": user_id,
+                "connections": connections,
+                "preferences": preferences,
+                **kwargs
+            }
+            
+            # Execute through AgentCore
+            result = self.tool_invocation.invoke_tool(
+                tool_name="manage_events",
+                inputs=parameters
+            )
+            
+            return {
+                "success": result.success,
+                "data": result.data,
+                "error": result.error,
+                "execution_time_ms": result.execution_time_ms,
+                "retry_count": result.retry_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to execute event management tool: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
