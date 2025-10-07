@@ -1,11 +1,454 @@
 import * as cdk from 'aws-cdk-lib';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as kms from 'aws-cdk-lib/aws-kms';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
+export interface CoreStackProps extends cdk.StackProps {
+  // Additional props can be added here if needed
+}
+
 export class CoreStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  // Public properties for other stacks to reference
+  public userPool: cognito.UserPool;
+  public userPoolClient: cognito.UserPoolClient;
+  public identityPool: cognito.CfnIdentityPool;
+  public dataEncryptionKey: kms.Key;
+  public tokenEncryptionKey: kms.Key;
+  public usersTable: dynamodb.Table;
+  public connectionsTable: dynamodb.Table;
+  public preferencesTable: dynamodb.Table;
+  public meetingsTable: dynamodb.Table;
+  public agentRunsTable: dynamodb.Table;
+  public auditLogsTable: dynamodb.Table;
+  public googleOAuthSecret: secretsmanager.Secret;
+  public microsoftOAuthSecret: secretsmanager.Secret;
+
+  constructor(scope: Construct, id: string, props?: CoreStackProps) {
     super(scope, id, props);
 
-    // TODO: Implement DynamoDB tables, KMS keys, Cognito User Pool, and Secrets Manager
-    // This will be implemented in task 2.1
+    // Create KMS keys for encryption
+    this.createKMSKeys();
+    
+    // Create DynamoDB tables
+    this.createDynamoDBTables();
+    
+    // Create Cognito User Pool and Identity Pool
+    this.createCognitoResources();
+    
+    // Create Secrets Manager secrets for OAuth credentials
+    this.createSecretsManagerSecrets();
+    
+    // Output important values
+    this.createOutputs();
+  }
+
+  private createKMSKeys(): void {
+    // KMS key for general data encryption (DynamoDB, etc.)
+    this.dataEncryptionKey = new kms.Key(this, 'DataEncryptionKey', {
+      description: 'KMS key for encrypting meeting scheduling agent data',
+      enableKeyRotation: true,
+      keySpec: kms.KeySpec.SYMMETRIC_DEFAULT,
+      keyUsage: kms.KeyUsage.ENCRYPT_DECRYPT,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
+    });
+
+    this.dataEncryptionKey.addAlias('alias/meeting-agent-data');
+
+    // Separate KMS key for OAuth token encryption
+    this.tokenEncryptionKey = new kms.Key(this, 'TokenEncryptionKey', {
+      description: 'KMS key for encrypting OAuth tokens',
+      enableKeyRotation: true,
+      keySpec: kms.KeySpec.SYMMETRIC_DEFAULT,
+      keyUsage: kms.KeyUsage.ENCRYPT_DECRYPT,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
+    });
+
+    this.tokenEncryptionKey.addAlias('alias/meeting-agent-tokens');
+  }
+
+  private createDynamoDBTables(): void {
+    // Users table
+    this.usersTable = new dynamodb.Table(this, 'UsersTable', {
+      tableName: 'meeting-agent-users',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+      encryptionKey: this.dataEncryptionKey,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
+    });
+
+    // Connections table for OAuth tokens
+    this.connectionsTable = new dynamodb.Table(this, 'ConnectionsTable', {
+      tableName: 'meeting-agent-connections',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+      encryptionKey: this.tokenEncryptionKey,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      timeToLiveAttribute: 'ttl', // For automatic token cleanup
+    });
+
+    // Add GSI for querying by provider
+    this.connectionsTable.addGlobalSecondaryIndex({
+      indexName: 'provider-index',
+      partitionKey: {
+        name: 'provider',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'created_at',
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    // Preferences table
+    this.preferencesTable = new dynamodb.Table(this, 'PreferencesTable', {
+      tableName: 'meeting-agent-preferences',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+      encryptionKey: this.dataEncryptionKey,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Meetings table
+    this.meetingsTable = new dynamodb.Table(this, 'MeetingsTable', {
+      tableName: 'meeting-agent-meetings',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'sk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+      encryptionKey: this.dataEncryptionKey,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Add GSI for querying meetings by date range
+    this.meetingsTable.addGlobalSecondaryIndex({
+      indexName: 'date-index',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'start',
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    // Agent runs table for tracking AI operations
+    this.agentRunsTable = new dynamodb.Table(this, 'AgentRunsTable', {
+      tableName: 'meeting-agent-runs',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+      encryptionKey: this.dataEncryptionKey,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      timeToLiveAttribute: 'ttl', // For automatic cleanup of old runs
+    });
+
+    // Add GSI for querying runs by user
+    this.agentRunsTable.addGlobalSecondaryIndex({
+      indexName: 'user-index',
+      partitionKey: {
+        name: 'user_id',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'created_at',
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    // Audit logs table
+    this.auditLogsTable = new dynamodb.Table(this, 'AuditLogsTable', {
+      tableName: 'meeting-agent-audit-logs',
+      partitionKey: {
+        name: 'pk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'sk',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+      encryptionKey: this.dataEncryptionKey,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      timeToLiveAttribute: 'ttl', // For automatic cleanup of old logs
+    });
+
+    // Add GSI for querying logs by run ID
+    this.auditLogsTable.addGlobalSecondaryIndex({
+      indexName: 'run-index',
+      partitionKey: {
+        name: 'run_id',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'sk',
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+  }
+
+  private createCognitoResources(): void {
+    // Create Cognito User Pool
+    this.userPool = new cognito.UserPool(this, 'UserPool', {
+      userPoolName: 'meeting-agent-users',
+      selfSignUpEnabled: true,
+      signInAliases: {
+        email: true,
+      },
+      autoVerify: {
+        email: true,
+      },
+      standardAttributes: {
+        email: {
+          required: true,
+          mutable: true,
+        },
+        givenName: {
+          required: false,
+          mutable: true,
+        },
+        familyName: {
+          required: false,
+          mutable: true,
+        },
+        timezone: {
+          required: false,
+          mutable: true,
+        },
+      },
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+        requireSymbols: false,
+      },
+      accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
+    });
+
+    // Create User Pool Client
+    this.userPoolClient = this.userPool.addClient('UserPoolClient', {
+      userPoolClientName: 'meeting-agent-web-client',
+      generateSecret: false, // For SPA applications
+      authFlows: {
+        userSrp: true,
+        userPassword: false, // Disable less secure flows
+        adminUserPassword: false,
+      },
+      oAuth: {
+        flows: {
+          authorizationCodeGrant: true,
+        },
+        scopes: [
+          cognito.OAuthScope.EMAIL,
+          cognito.OAuthScope.OPENID,
+          cognito.OAuthScope.PROFILE,
+        ],
+        callbackUrls: [
+          'http://localhost:3000/auth/callback', // For local development
+          // Production URLs will be added via environment variables
+        ],
+        logoutUrls: [
+          'http://localhost:3000/auth/logout',
+        ],
+      },
+      preventUserExistenceErrors: true,
+      refreshTokenValidity: cdk.Duration.days(30),
+      accessTokenValidity: cdk.Duration.hours(1),
+      idTokenValidity: cdk.Duration.hours(1),
+    });
+
+    // Create Identity Pool for AWS resource access
+    this.identityPool = new cognito.CfnIdentityPool(this, 'IdentityPool', {
+      identityPoolName: 'meeting-agent-identity-pool',
+      allowUnauthenticatedIdentities: false,
+      cognitoIdentityProviders: [
+        {
+          clientId: this.userPoolClient.userPoolClientId,
+          providerName: this.userPool.userPoolProviderName,
+        },
+      ],
+    });
+
+    // Create IAM role for authenticated users
+    const authenticatedRole = new iam.Role(this, 'AuthenticatedRole', {
+      assumedBy: new iam.FederatedPrincipal(
+        'cognito-identity.amazonaws.com',
+        {
+          StringEquals: {
+            'cognito-identity.amazonaws.com:aud': this.identityPool.ref,
+          },
+          'ForAnyValue:StringLike': {
+            'cognito-identity.amazonaws.com:amr': 'authenticated',
+          },
+        },
+        'sts:AssumeRoleWithWebIdentity'
+      ),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoPowerUser'),
+      ],
+    });
+
+    // Attach the role to the identity pool
+    new cognito.CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+      identityPoolId: this.identityPool.ref,
+      roles: {
+        authenticated: authenticatedRole.roleArn,
+      },
+    });
+  }
+
+  private createSecretsManagerSecrets(): void {
+    // Google OAuth credentials
+    this.googleOAuthSecret = new secretsmanager.Secret(this, 'GoogleOAuthSecret', {
+      secretName: 'meeting-agent/oauth/google',
+      description: 'Google OAuth 2.0 client credentials for calendar and Gmail access',
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          client_id: '',
+          client_secret: '',
+          redirect_uris: ['http://localhost:3000/auth/google/callback'],
+        }),
+        generateStringKey: 'placeholder',
+        excludeCharacters: '"@/\\',
+      },
+      encryptionKey: this.tokenEncryptionKey,
+    });
+
+    // Microsoft OAuth credentials
+    this.microsoftOAuthSecret = new secretsmanager.Secret(this, 'MicrosoftOAuthSecret', {
+      secretName: 'meeting-agent/oauth/microsoft',
+      description: 'Microsoft Graph OAuth 2.0 client credentials for calendar and mail access',
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          client_id: '',
+          client_secret: '',
+          tenant_id: '',
+          redirect_uris: ['http://localhost:3000/auth/microsoft/callback'],
+        }),
+        generateStringKey: 'placeholder',
+        excludeCharacters: '"@/\\',
+      },
+      encryptionKey: this.tokenEncryptionKey,
+    });
+
+    // Grant read access to secrets for Lambda functions (will be used in API stack)
+    // This policy will be referenced by other stacks through the public properties
+  }
+
+  private createOutputs(): void {
+    // Cognito outputs
+    new cdk.CfnOutput(this, 'UserPoolId', {
+      value: this.userPool.userPoolId,
+      description: 'Cognito User Pool ID',
+      exportName: 'meeting-agent-user-pool-id',
+    });
+
+    new cdk.CfnOutput(this, 'UserPoolClientId', {
+      value: this.userPoolClient.userPoolClientId,
+      description: 'Cognito User Pool Client ID',
+      exportName: 'meeting-agent-user-pool-client-id',
+    });
+
+    new cdk.CfnOutput(this, 'IdentityPoolId', {
+      value: this.identityPool.ref,
+      description: 'Cognito Identity Pool ID',
+      exportName: 'meeting-agent-identity-pool-id',
+    });
+
+    // DynamoDB table outputs
+    new cdk.CfnOutput(this, 'UsersTableName', {
+      value: this.usersTable.tableName,
+      description: 'Users DynamoDB table name',
+      exportName: 'meeting-agent-users-table',
+    });
+
+    new cdk.CfnOutput(this, 'ConnectionsTableName', {
+      value: this.connectionsTable.tableName,
+      description: 'Connections DynamoDB table name',
+      exportName: 'meeting-agent-connections-table',
+    });
+
+    new cdk.CfnOutput(this, 'PreferencesTableName', {
+      value: this.preferencesTable.tableName,
+      description: 'Preferences DynamoDB table name',
+      exportName: 'meeting-agent-preferences-table',
+    });
+
+    new cdk.CfnOutput(this, 'MeetingsTableName', {
+      value: this.meetingsTable.tableName,
+      description: 'Meetings DynamoDB table name',
+      exportName: 'meeting-agent-meetings-table',
+    });
+
+    new cdk.CfnOutput(this, 'AgentRunsTableName', {
+      value: this.agentRunsTable.tableName,
+      description: 'Agent Runs DynamoDB table name',
+      exportName: 'meeting-agent-runs-table',
+    });
+
+    new cdk.CfnOutput(this, 'AuditLogsTableName', {
+      value: this.auditLogsTable.tableName,
+      description: 'Audit Logs DynamoDB table name',
+      exportName: 'meeting-agent-audit-logs-table',
+    });
+
+    // KMS key outputs
+    new cdk.CfnOutput(this, 'DataEncryptionKeyId', {
+      value: this.dataEncryptionKey.keyId,
+      description: 'Data encryption KMS key ID',
+      exportName: 'meeting-agent-data-key-id',
+    });
+
+    new cdk.CfnOutput(this, 'TokenEncryptionKeyId', {
+      value: this.tokenEncryptionKey.keyId,
+      description: 'Token encryption KMS key ID',
+      exportName: 'meeting-agent-token-key-id',
+    });
+
+    // Secrets Manager outputs
+    new cdk.CfnOutput(this, 'GoogleOAuthSecretArn', {
+      value: this.googleOAuthSecret.secretArn,
+      description: 'Google OAuth secret ARN',
+      exportName: 'meeting-agent-google-oauth-secret',
+    });
+
+    new cdk.CfnOutput(this, 'MicrosoftOAuthSecretArn', {
+      value: this.microsoftOAuthSecret.secretArn,
+      description: 'Microsoft OAuth secret ARN',
+      exportName: 'meeting-agent-microsoft-oauth-secret',
+    });
   }
 }
