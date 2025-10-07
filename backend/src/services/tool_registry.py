@@ -1,12 +1,15 @@
 """
 Tool Registry Service for registering and managing agent tools.
-Integrates with AgentCore tool invocation system.
+Integrates with AgentCore tool invocation system and audit logging.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+import time
+from typing import Dict, List, Any, Optional, Callable
+from functools import wraps
 
 from .agentcore_tool_invocation import AgentCoreToolInvocation
+from .audit_service import AuditService
 from ..tools.availability_tool import AvailabilityTool, AvailabilityRequest
 from ..tools.event_management_tool import EventManagementTool, EventRequest, RescheduleRequest
 from ..tools.email_communication_tool import EmailCommunicationTool, EmailRequest, EmailType
@@ -15,24 +18,32 @@ from ..tools.conflict_resolution_tool import ConflictResolutionTool
 from ..models.connection import Connection
 from ..models.preferences import Preferences
 from ..models.meeting import Meeting
-from ..utils.logging import setup_logger
+from ..utils.logging import setup_logger, create_agent_logger
 
 logger = setup_logger(__name__)
 
 
 class ToolRegistry:
     """
-    Registry for managing and registering agent tools with AgentCore.
+    Registry for managing and registering agent tools with AgentCore and audit logging.
     """
     
-    def __init__(self, tool_invocation_service: AgentCoreToolInvocation):
+    def __init__(self, tool_invocation_service: AgentCoreToolInvocation, user_id: Optional[str] = None, run_id: Optional[str] = None):
         """
         Initialize the tool registry.
         
         Args:
             tool_invocation_service: AgentCore tool invocation service
+            user_id: User ID for audit logging
+            run_id: Agent run ID for audit logging
         """
         self.tool_invocation = tool_invocation_service
+        self.audit_service = AuditService()
+        self.user_id = user_id
+        self.run_id = run_id
+        self.audit_logger = create_agent_logger('tool_registry', user_id=user_id)
+        
+        # Initialize tools
         self.availability_tool = AvailabilityTool()
         self.event_management_tool = EventManagementTool()
         self.email_communication_tool = EmailCommunicationTool()
@@ -753,3 +764,163 @@ def initialize_tool_registry() -> ToolRegistry:
     # Force re-initialization
     _tool_registry_instance = None
     return get_tool_registry()
+    
+    def audit_tool_invocation(self, tool_name: str):
+        """
+        Decorator to add audit logging to tool invocations.
+        
+        Args:
+            tool_name: Name of the tool being invoked
+            
+        Returns:
+            Decorated function with audit logging
+        """
+        def decorator(func: Callable) -> Callable:
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                start_time = time.time()
+                success = False
+                error_message = None
+                outputs = {}
+                
+                try:
+                    # Extract inputs for logging
+                    inputs = {
+                        'args': args,
+                        'kwargs': kwargs
+                    }
+                    
+                    # Execute the tool
+                    result = func(*args, **kwargs)
+                    outputs = result if isinstance(result, dict) else {'result': result}
+                    success = True
+                    
+                    return result
+                    
+                except Exception as e:
+                    error_message = str(e)
+                    logger.error(f"Tool invocation failed for {tool_name}: {e}")
+                    raise
+                    
+                finally:
+                    # Calculate execution time
+                    execution_time_ms = int((time.time() - start_time) * 1000)
+                    
+                    # Log tool invocation if user_id is available
+                    if self.user_id and self.run_id:
+                        try:
+                            self.audit_service.log_tool_invocation(
+                                user_id=self.user_id,
+                                run_id=self.run_id,
+                                tool_name=tool_name,
+                                inputs=inputs,
+                                outputs=outputs,
+                                execution_time_ms=execution_time_ms,
+                                success=success,
+                                error_message=error_message
+                            )
+                        except Exception as audit_error:
+                            logger.error(f"Failed to log tool invocation audit: {audit_error}")
+                    
+                    # Log to CloudWatch
+                    self.audit_logger.log_tool_invocation(
+                        tool_name=tool_name,
+                        inputs=inputs,
+                        outputs=outputs,
+                        success=success,
+                        execution_time_ms=execution_time_ms,
+                        error_message=error_message
+                    )
+            
+            return wrapper
+        return decorator
+    
+    def get_audited_availability_tool(self) -> AvailabilityTool:
+        """
+        Get availability tool with audit logging.
+        
+        Returns:
+            Availability tool with audit logging wrapper
+        """
+        # Wrap tool methods with audit logging
+        original_get_availability = self.availability_tool.get_availability
+        original_check_conflicts = self.availability_tool.check_conflicts
+        
+        self.availability_tool.get_availability = self.audit_tool_invocation('availability_get')(original_get_availability)
+        self.availability_tool.check_conflicts = self.audit_tool_invocation('availability_check_conflicts')(original_check_conflicts)
+        
+        return self.availability_tool
+    
+    def get_audited_event_management_tool(self) -> EventManagementTool:
+        """
+        Get event management tool with audit logging.
+        
+        Returns:
+            Event management tool with audit logging wrapper
+        """
+        # Wrap tool methods with audit logging
+        original_create_event = self.event_management_tool.create_event
+        original_update_event = self.event_management_tool.update_event
+        original_delete_event = self.event_management_tool.delete_event
+        original_reschedule_event = self.event_management_tool.reschedule_event
+        
+        self.event_management_tool.create_event = self.audit_tool_invocation('event_create')(original_create_event)
+        self.event_management_tool.update_event = self.audit_tool_invocation('event_update')(original_update_event)
+        self.event_management_tool.delete_event = self.audit_tool_invocation('event_delete')(original_delete_event)
+        self.event_management_tool.reschedule_event = self.audit_tool_invocation('event_reschedule')(original_reschedule_event)
+        
+        return self.event_management_tool
+    
+    def get_audited_email_tool(self) -> EmailCommunicationTool:
+        """
+        Get email communication tool with audit logging.
+        
+        Returns:
+            Email communication tool with audit logging wrapper
+        """
+        # Wrap tool methods with audit logging
+        original_send_email = self.email_communication_tool.send_email
+        original_send_meeting_invitation = self.email_communication_tool.send_meeting_invitation
+        original_send_reschedule_notification = self.email_communication_tool.send_reschedule_notification
+        
+        self.email_communication_tool.send_email = self.audit_tool_invocation('email_send')(original_send_email)
+        self.email_communication_tool.send_meeting_invitation = self.audit_tool_invocation('email_meeting_invitation')(original_send_meeting_invitation)
+        self.email_communication_tool.send_reschedule_notification = self.audit_tool_invocation('email_reschedule_notification')(original_send_reschedule_notification)
+        
+        return self.email_communication_tool
+    
+    def get_audited_preference_tool(self) -> PreferenceManagementTool:
+        """
+        Get preference management tool with audit logging.
+        
+        Returns:
+            Preference management tool with audit logging wrapper
+        """
+        # Wrap tool methods with audit logging
+        original_get_preferences = self.preference_management_tool.get_preferences
+        original_update_preferences = self.preference_management_tool.update_preferences
+        original_extract_preferences = self.preference_management_tool.extract_preferences_from_text
+        
+        self.preference_management_tool.get_preferences = self.audit_tool_invocation('preference_get')(original_get_preferences)
+        self.preference_management_tool.update_preferences = self.audit_tool_invocation('preference_update')(original_update_preferences)
+        self.preference_management_tool.extract_preferences_from_text = self.audit_tool_invocation('preference_extract')(original_extract_preferences)
+        
+        return self.preference_management_tool
+    
+    def get_audited_conflict_resolution_tool(self) -> ConflictResolutionTool:
+        """
+        Get conflict resolution tool with audit logging.
+        
+        Returns:
+            Conflict resolution tool with audit logging wrapper
+        """
+        # Wrap tool methods with audit logging
+        original_detect_conflicts = self.conflict_resolution_tool.detect_conflicts
+        original_resolve_conflicts = self.conflict_resolution_tool.resolve_conflicts
+        original_suggest_alternatives = self.conflict_resolution_tool.suggest_alternatives
+        
+        self.conflict_resolution_tool.detect_conflicts = self.audit_tool_invocation('conflict_detect')(original_detect_conflicts)
+        self.conflict_resolution_tool.resolve_conflicts = self.audit_tool_invocation('conflict_resolve')(original_resolve_conflicts)
+        self.conflict_resolution_tool.suggest_alternatives = self.audit_tool_invocation('conflict_suggest_alternatives')(original_suggest_alternatives)
+        
+        return self.conflict_resolution_tool
