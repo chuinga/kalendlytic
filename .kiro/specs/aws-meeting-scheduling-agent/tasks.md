@@ -61,14 +61,14 @@
 - [ ] 4. Build calendar integration and availability aggregation
 - [x] 4.1 Create Google Calendar API integration
 
-
   - Write Python functions to fetch calendar events from Google Calendar API
   - Implement event creation, modification, and deletion operations
   - Add timezone normalization and ISO 8601 formatting
   - Create availability calculation logic for Google calendars
   - _Requirements: 2.1, 2.3, 2.5_
 
-- [ ] 4.2 Create Microsoft Graph Calendar integration
+- [x] 4.2 Create Microsoft Graph Calendar integration
+
 
   - Write Python functions to fetch calendar events from Microsoft Graph API
   - Implement event creation, modification, and deletion operations for Outlook
