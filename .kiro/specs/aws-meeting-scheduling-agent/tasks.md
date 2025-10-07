@@ -36,14 +36,14 @@
 - [ ] 3. Implement OAuth integration and token management
 - [x] 3.1 Create Google OAuth flow implementation
 
-
   - Write Python code for Google OAuth 2.0 authorization flow with PKCE
   - Implement token exchange and refresh token handling
   - Create secure token storage with KMS encryption in DynamoDB
   - Add scope validation for Google Calendar and Gmail APIs
   - _Requirements: 2.1, 7.1, 7.5_
 
-- [ ] 3.2 Create Microsoft OAuth flow implementation
+- [x] 3.2 Create Microsoft OAuth flow implementation
+
 
   - Write Python code for Microsoft Graph OAuth 2.0 authorization flow
   - Implement token exchange and refresh token handling for Microsoft Graph
