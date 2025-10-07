@@ -174,7 +174,8 @@
 
   - _Requirements: 8.1, 8.6, 9.2_
 
-- [ ] 8.2 Create OAuth connection interface
+- [x] 8.2 Create OAuth connection interface
+
 
   - Build Google OAuth connection flow with proper scopes
   - Build Microsoft OAuth connection flow with Graph API scopes

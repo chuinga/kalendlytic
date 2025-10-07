@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { Calendar, Settings, Link, Activity, User, LogOut } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { ConnectionStatus } from '@/components/connections/ConnectionStatus'
+import { ConnectionsPage } from '@/components/connections/ConnectionsPage'
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
@@ -27,6 +29,7 @@ export default function Dashboard() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              <ConnectionStatus />
               <span className="text-sm text-gray-700">
                 Welcome, {user?.email || user?.attributes?.email}
               </span>
@@ -94,13 +97,8 @@ export default function Dashboard() {
           )}
 
           {activeTab === 'connect' && (
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Connect Accounts
-              </h2>
-              <p className="text-gray-600">
-                OAuth connection interface will be implemented in task 8.2
-              </p>
+            <div className="-m-6">
+              <ConnectionsPage />
             </div>
           )}
 
