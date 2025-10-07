@@ -58,7 +58,8 @@
   - Add monitoring and alerting for token refresh failures
   - _Requirements: 2.6, 7.5_
 
-- [ ] 4. Build calendar integration and availability aggregation
+- [x] 4. Build calendar integration and availability aggregation
+
 - [x] 4.1 Create Google Calendar API integration
 
   - Write Python functions to fetch calendar events from Google Calendar API
@@ -69,7 +70,6 @@
 
 - [x] 4.2 Create Microsoft Graph Calendar integration
 
-
   - Write Python functions to fetch calendar events from Microsoft Graph API
   - Implement event creation, modification, and deletion operations for Outlook
   - Add timezone handling and event format normalization
@@ -78,12 +78,6 @@
 
 - [x] 4.3 Implement unified availability aggregation
 
-
-
-
-
-
-
   - Create service to merge availability data from multiple calendar providers
   - Implement conflict detection algorithm across all connected calendars
   - Add free/busy time calculation with configurable buffer times
@@ -91,7 +85,7 @@
   - _Requirements: 2.4, 3.1, 3.2_
 
 - [ ] 5. Implement Amazon Bedrock and AgentCore integration
-- [ ] 5.1 Set up Bedrock Claude Sonnet 4.5 client
+- [x] 5.1 Set up Bedrock Claude Sonnet 4.5 client
 
   - Create Python client for Amazon Bedrock with Claude Sonnet 4.5 model
   - Implement prompt templates for scheduling agent reasoning
@@ -103,6 +97,7 @@
 
   - Create AgentCore router to determine optimal tool execution sequence
   - Implement planning logic for complex scheduling scenarios
+
   - Add decision tree for handling conflicts and prioritization
   - Create context management for multi-step agent operations
   - _Requirements: 1.2, 1.4_
