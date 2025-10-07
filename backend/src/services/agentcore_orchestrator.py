@@ -618,8 +618,68 @@ class AgentCoreOrchestrator:
             
             logger.info(f"Execution cleaned up: {execution_id}")
     
+    def execute_availability_lookup(
+        self,
+        user_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        connections: List[Dict[str, Any]],
+        preferences: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Execute availability lookup using the integrated availability tool.
+        
+        Args:
+            user_id: User identifier
+            start_date: Start date for availability window
+            end_date: End date for availability window
+            connections: Active calendar connections
+            preferences: User preferences
+            **kwargs: Additional parameters for availability lookup
+            
+        Returns:
+            Availability lookup result
+        """
+        try:
+            from .tool_registry import get_tool_registry
+            
+            logger.info(f"Executing availability lookup for user {user_id}")
+            
+            # Get tool registry
+            tool_registry = get_tool_registry()
+            
+            # Execute availability tool
+            result = tool_registry.execute_availability_tool(
+                user_id=user_id,
+                start_date=start_date.isoformat(),
+                end_date=end_date.isoformat(),
+                connections=connections,
+                preferences=preferences,
+                **kwargs
+            )
+            
+            logger.info(f"Availability lookup completed for user {user_id}: {result.get('success', False)}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to execute availability lookup: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'available_slots': [],
+                'total_slots_found': 0
+            }
+    
     def get_orchestrator_stats(self) -> Dict[str, Any]:
         """Get orchestrator statistics."""
+        try:
+            from .tool_registry import get_tool_registry
+            tool_registry = get_tool_registry()
+            tool_stats = tool_registry.get_registry_stats()
+        except Exception:
+            tool_stats = {"error": "Tool registry not available"}
+        
         return {
             'active_executions': len(self.active_executions),
             'router_stats': {
@@ -630,5 +690,6 @@ class AgentCoreOrchestrator:
                 'cached_plans': len(self.planner.planning_cache),
                 'scenario_templates': len(self.planner.scenario_templates)
             },
+            'tool_registry_stats': tool_stats,
             'timestamp': datetime.utcnow().isoformat()
         }

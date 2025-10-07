@@ -852,12 +852,43 @@ class AgentCoreToolInvocation:
             max_retries=2
         )
         
+        # Get Availability Tool schema
+        get_availability_schema = ToolSchema(
+            tool_name="get_availability",
+            input_schema={
+                "user_id": {"type": "str", "constraints": {"min_length": 1}},
+                "start_date": {"type": "str", "constraints": {"format": "iso_datetime"}},
+                "end_date": {"type": "str", "constraints": {"format": "iso_datetime"}},
+                "attendees": {"type": "list"},
+                "duration_minutes": {"type": "int", "constraints": {"min_value": 15, "max_value": 480}},
+                "buffer_minutes": {"type": "int", "constraints": {"min_value": 0, "max_value": 60}},
+                "max_results": {"type": "int", "constraints": {"min_value": 1, "max_value": 50}},
+                "time_preferences": {"type": "dict"},
+                "working_hours_only": {"type": "bool"}
+            },
+            output_schema={
+                "success": {"type": "bool"},
+                "available_slots": {"type": "list"},
+                "total_slots_found": {"type": "int"},
+                "date_range_start": {"type": "str"},
+                "date_range_end": {"type": "str"},
+                "constraints_applied": {"type": "list"},
+                "ranking_factors": {"type": "dict"},
+                "execution_time_ms": {"type": "int"}
+            },
+            required_inputs=["user_id", "start_date", "end_date"],
+            optional_inputs=["attendees", "duration_minutes", "buffer_minutes", "max_results", "time_preferences", "working_hours_only"],
+            timeout_ms=12000,
+            max_retries=2
+        )
+
         # Store schemas (tools will be registered when actual implementations are available)
         self.tool_schemas.update({
             "oauth_manager": oauth_schema,
             "availability_aggregator": availability_schema,
             "calendar_service": calendar_schema,
-            "scheduling_agent": scheduling_schema
+            "scheduling_agent": scheduling_schema,
+            "get_availability": get_availability_schema
         })
         
         logger.info("Built-in tool schemas registered")

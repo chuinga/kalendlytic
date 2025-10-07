@@ -43,6 +43,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return handle_conflict_resolution(body)
         elif path == '/agent/optimize' and http_method == 'POST':
             return handle_multi_step_optimization(body)
+        elif path == '/agent/availability' and http_method == 'POST':
+            return handle_availability_lookup(body)
         elif path == '/agent/status' and http_method == 'GET':
             return handle_execution_status(event.get('queryStringParameters', {}))
         elif path == '/agent/stats' and http_method == 'GET':
@@ -240,6 +242,83 @@ def handle_execution_status(query_params: Dict[str, Any]) -> Dict[str, Any]:
         
     except Exception as e:
         logger.error(f"Status check error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': get_cors_headers(),
+            'body': json.dumps({
+                'error': 'Internal server error',
+                'message': str(e)
+            })
+        }
+
+
+def handle_availability_lookup(body: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle availability lookup requests."""
+    try:
+        from datetime import datetime
+        
+        # Extract required parameters
+        user_id = body.get('user_id')
+        start_date_str = body.get('start_date')
+        end_date_str = body.get('end_date')
+        connections = body.get('connections', [])
+        preferences = body.get('preferences')
+        
+        if not all([user_id, start_date_str, end_date_str]):
+            return {
+                'statusCode': 400,
+                'headers': get_cors_headers(),
+                'body': json.dumps({
+                    'error': 'Bad request',
+                    'message': 'user_id, start_date, and end_date are required'
+                })
+            }
+        
+        # Parse dates
+        try:
+            start_date = datetime.fromisoformat(start_date_str.replace('Z', '+00:00'))
+            end_date = datetime.fromisoformat(end_date_str.replace('Z', '+00:00'))
+        except ValueError as e:
+            return {
+                'statusCode': 400,
+                'headers': get_cors_headers(),
+                'body': json.dumps({
+                    'error': 'Bad request',
+                    'message': f'Invalid date format: {str(e)}'
+                })
+            }
+        
+        # Extract optional parameters
+        attendees = body.get('attendees')
+        duration_minutes = body.get('duration_minutes', 30)
+        buffer_minutes = body.get('buffer_minutes', 15)
+        max_results = body.get('max_results', 10)
+        time_preferences = body.get('time_preferences')
+        working_hours_only = body.get('working_hours_only', True)
+        
+        # Execute availability lookup
+        result = orchestrator.execute_availability_lookup(
+            user_id=user_id,
+            start_date=start_date,
+            end_date=end_date,
+            connections=connections,
+            preferences=preferences,
+            attendees=attendees,
+            duration_minutes=duration_minutes,
+            buffer_minutes=buffer_minutes,
+            max_results=max_results,
+            time_preferences=time_preferences,
+            working_hours_only=working_hours_only
+        )
+        
+        return {
+            'statusCode': 200,
+            'headers': get_cors_headers(),
+            'body': json.dumps(result)
+        }
+        
+    except Exception as e:
+        logger.error(f"Availability lookup error: {e}")
         return {
             'statusCode': 500,
             'headers': get_cors_headers(),

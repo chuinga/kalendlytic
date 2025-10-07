@@ -86,7 +86,6 @@
 
 - [x] 5. Implement Amazon Bedrock and AgentCore integration
 
-
 - [x] 5.1 Set up Bedrock Claude Sonnet 4.5 client
 
   - Create Python client for Amazon Bedrock with Claude Sonnet 4.5 model
@@ -113,7 +112,8 @@
   - _Requirements: 1.2, 1.3_
 
 - [ ] 6. Build agent tools for calendar and email operations
-- [ ] 6.1 Create availability tool
+- [x] 6.1 Create availability tool
+
 
   - Implement get_availability function with date range and attendee filtering
   - Add constraint handling for working hours and buffer times
