@@ -12,8 +12,8 @@ class BedrockConfig:
     # Default AWS region for Bedrock
     DEFAULT_REGION = "eu-west-1"
     
-    # Model configuration
-    MODEL_ID = "amazon.nova-pro-v1:0"
+    # Model configuration - using inference profile for Nova Pro
+    MODEL_ID = "eu.amazon.nova-pro-v1:0"
     
     # Default parameters
     DEFAULT_MAX_TOKENS = 4096
