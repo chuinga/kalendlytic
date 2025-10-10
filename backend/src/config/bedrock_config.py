@@ -13,7 +13,7 @@ class BedrockConfig:
     DEFAULT_REGION = "us-east-1"
     
     # Model configuration
-    MODEL_ID = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    MODEL_ID = "amazon.nova-pro-v1:0"
     
     # Default parameters
     DEFAULT_MAX_TOKENS = 4096
@@ -21,9 +21,9 @@ class BedrockConfig:
     DEFAULT_TOP_P = 0.9
     DEFAULT_MAX_RETRIES = 3
     
-    # Cost tracking (per 1K tokens)
-    INPUT_TOKEN_COST_PER_1K = 0.003  # $0.003 per 1K input tokens
-    OUTPUT_TOKEN_COST_PER_1K = 0.015  # $0.015 per 1K output tokens
+    # Cost tracking (per 1K tokens) - Amazon Nova Pro pricing
+    INPUT_TOKEN_COST_PER_1K = 0.0008  # $0.0008 per 1K input tokens
+    OUTPUT_TOKEN_COST_PER_1K = 0.0032  # $0.0032 per 1K output tokens
     
     @classmethod
     def get_config(cls) -> Dict[str, Any]:

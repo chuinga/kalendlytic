@@ -265,7 +265,7 @@ def lambda_handler(event, context):
           'bedrock:ListAgents',
         ],
         resources: [
-          `arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0`,
+          `arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0`,
           `arn:aws:bedrock:*:*:agent/*`,
         ],
       })

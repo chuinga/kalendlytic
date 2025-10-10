@@ -1,5 +1,5 @@
 """
-Amazon Bedrock Claude Sonnet 4.5 client for meeting scheduling agent.
+Amazon Bedrock Nova Pro client for meeting scheduling agent.
 """
 
 import json
@@ -40,11 +40,11 @@ class BedrockClientError(Exception):
 
 
 class BedrockClient:
-    """Amazon Bedrock client for Claude Sonnet 4.5 model."""
+    """Amazon Bedrock client for Amazon Nova Pro model."""
     
-    MODEL_ID = "anthropic.claude-3-5-sonnet-20241022-v2:0"
-    INPUT_TOKEN_COST_PER_1K = 0.003
-    OUTPUT_TOKEN_COST_PER_1K = 0.015
+    MODEL_ID = "amazon.nova-pro-v1:0"
+    INPUT_TOKEN_COST_PER_1K = 0.0008
+    OUTPUT_TOKEN_COST_PER_1K = 0.0032
     
     def __init__(self, region_name: str = "us-east-1", max_retries: int = 3):
         self.region_name = region_name
@@ -148,12 +148,11 @@ class BedrockClient:
         temperature: float = 0.1,
         top_p: float = 0.9
     ) -> BedrockResponse:
-        """Invoke Claude Sonnet 4.5 model with the given prompt."""
+        """Invoke Amazon Nova Pro model with the given prompt."""
         if not prompt or not prompt.strip():
             raise BedrockClientError("Prompt cannot be empty")
         
         body = {
-            "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": max_tokens,
             "temperature": temperature,
             "top_p": top_p,

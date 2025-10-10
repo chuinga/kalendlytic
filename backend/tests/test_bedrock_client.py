@@ -26,7 +26,7 @@ class TestBedrockClient:
             
             assert client.region_name == "us-east-1"
             assert client.max_retries == 3
-            assert client.MODEL_ID == "anthropic.claude-3-5-sonnet-20241022-v2:0"
+            assert client.MODEL_ID == "amazon.nova-pro-v1:0"
     
     def test_init_failure(self):
         """Test client initialization failure."""
