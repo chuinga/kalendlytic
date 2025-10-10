@@ -168,6 +168,9 @@
 
 - [x] 8.1 Create authentication and user management
 
+
+
+
   - Implement Cognito authentication with email/password login
   - Create user registration and profile management components
   - Add JWT token handling and automatic refresh
