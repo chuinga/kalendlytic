@@ -9,6 +9,7 @@ Choose your preferred way to run the application:
 ### Option 1: Development Mode (Recommended for Testing)
 
 **Automated Setup:**
+
 ```bash
 # Run the setup script (handles everything automatically)
 ./scripts/setup-dev.sh
@@ -20,7 +21,7 @@ cd backend
 python -m uvicorn src.main:app --reload --port 8000
 
 # Terminal 2 - Frontend
-cd frontend  
+cd frontend
 npm run dev
 
 # Terminal 3 - Infrastructure (optional)
@@ -29,6 +30,7 @@ npm run watch
 ```
 
 **Access your application:**
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
 - API Documentation: http://localhost:8000/docs
@@ -36,12 +38,14 @@ npm run watch
 ### Option 2: Full AWS Deployment
 
 **Automated Deployment:**
+
 ```bash
 # Deploy everything to AWS
 ./scripts/deploy.sh
 ```
 
 **Manual Deployment:**
+
 ```bash
 # 1. Configure AWS credentials
 aws configure
@@ -83,16 +87,18 @@ aws-meeting-scheduling-agent/
 ### Environment Setup
 
 1. **Create your environment file:**
+
    ```bash
    cp .env.example .env
    ```
 
 2. **Update key variables in `.env`:**
+
    ```bash
    # AWS Configuration
    AWS_REGION=eu-west-1
    AWS_ACCOUNT_ID=your-account-id
-   
+
    # OAuth Credentials (required for calendar integration)
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
@@ -105,6 +111,7 @@ aws-meeting-scheduling-agent/
 The application needs OAuth credentials to integrate with Google and Microsoft calendars:
 
 #### Google OAuth Setup
+
 1. Visit [Google Cloud Console](https://console.cloud.google.com/)
 2. Create/select a project
 3. Enable APIs: Google Calendar API, Gmail API
@@ -115,6 +122,7 @@ The application needs OAuth credentials to integrate with Google and Microsoft c
 6. Copy Client ID and Secret to your `.env` file
 
 #### Microsoft OAuth Setup
+
 1. Visit [Azure Portal](https://portal.azure.com/)
 2. Go to Azure Active Directory > App registrations
 3. Register new application
@@ -137,13 +145,14 @@ Run the comprehensive test suite to verify everything works:
 
 # Run specific test suites
 cd backend && pytest                    # Backend unit tests
-cd frontend && npm test                 # Frontend component tests  
+cd frontend && npm test                 # Frontend component tests
 cd e2e && ./run-tests.sh all           # End-to-end tests
 ```
 
 ## 🛠️ Development
 
 ### Local Development
+
 ```bash
 # Backend development with auto-reload
 cd backend
@@ -159,6 +168,7 @@ npm run watch
 ```
 
 ### Testing During Development
+
 ```bash
 # Backend tests with coverage
 cd backend
@@ -197,12 +207,13 @@ The system follows a serverless architecture:
 ## 🔧 Common Issues & Solutions
 
 ### Setup Issues
+
 ```bash
 # Node.js version issues
 node --version  # Should be 18+
 npm install -g n && n latest
 
-# Python version issues  
+# Python version issues
 python3 --version  # Should be 3.9+
 
 # AWS CLI not configured
@@ -211,6 +222,7 @@ aws sts get-caller-identity  # Verify credentials
 ```
 
 ### Development Issues
+
 ```bash
 # Port already in use
 lsof -ti:3000 | xargs kill -9  # Kill process on port 3000
@@ -222,6 +234,7 @@ rm -rf __pycache__ && pip install -r requirements.txt  # Backend
 ```
 
 ### OAuth Issues
+
 - **Google**: Ensure redirect URIs match exactly (including http/https)
 - **Microsoft**: Verify API permissions are granted by admin
 - **Both**: Check client IDs and secrets are correctly copied

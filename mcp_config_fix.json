@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "chrome-devtools-mcp",
+      "args": [
+        "--headless",
+        "--isolated"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "new_page",
+        "navigate",
+        "screenshot"
+      ],
+      "disabledTools": []
+    }
+  }
+}

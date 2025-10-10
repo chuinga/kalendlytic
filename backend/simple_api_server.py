@@ -245,10 +245,10 @@ async def preferences_health():
 
 if __name__ == "__main__":
     print("🚀 Starting AWS Meeting Scheduling Agent API Server")
-    print("📍 Server: http://localhost:8000")
-    print("📖 Docs: http://localhost:8000/docs")
-    print("🧪 Nova Pro Test: http://localhost:8000/nova/test")
-    print("🤖 Schedule Meeting: POST http://localhost:8000/agent/schedule")
+    print("📍 Server: http://localhost:8002")
+    print("📖 Docs: http://localhost:8002/docs")
+    print("🧪 Nova Pro Test: http://localhost:8002/nova/test")
+    print("🤖 Schedule Meeting: POST http://localhost:8002/agent/schedule")
     print()
     
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=8002, reload=False)
