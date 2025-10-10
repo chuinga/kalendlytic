@@ -12,7 +12,7 @@ PROJECT_NAME="meeting-scheduling-agent"
 
 # Default values
 ENVIRONMENT="dev"
-REGION="us-east-1"
+REGION="eu-west-1"
 PROFILE=""
 VERBOSE=false
 FORCE=false
@@ -50,14 +50,14 @@ Bootstrap AWS CDK for Meeting Scheduling Agent
 
 OPTIONS:
     -e, --environment ENV    Environment (dev, staging, prod) [default: dev]
-    -r, --region REGION      AWS region [default: us-east-1]
+    -r, --region REGION      AWS region [default: eu-west-1]
     -p, --profile PROFILE    AWS profile to use
     -f, --force             Force bootstrap even if already exists
     -v, --verbose           Enable verbose output
     -h, --help              Show this help message
 
 EXAMPLES:
-    $0 -e dev -r us-east-1
+    $0 -e dev -r eu-west-1
     $0 -e prod -p production-profile
     $0 --force -e staging
 

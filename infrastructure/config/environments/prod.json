@@ -1,6 +1,6 @@
 {
   "environment": "prod",
-  "region": "us-east-1",
+  "region": "eu-west-1",
   "account": "${CDK_DEFAULT_ACCOUNT}",
   "stackPrefix": "meeting-scheduling-agent-prod",
   "tags": {
@@ -94,7 +94,7 @@
       "blockPublicAccess": true,
       "crossRegionReplication": {
         "enabled": true,
-        "destinationBucket": "meeting-scheduler-backup-us-west-2"
+        "destinationBucket": "meeting-scheduler-backup-eu-central-1"
       }
     },
     "cloudFront": {
@@ -104,11 +104,11 @@
       "customDomain": {
         "enabled": true,
         "domainName": "meeting-scheduler.example.com",
-        "certificateArn": "arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID"
+        "certificateArn": "arn:aws:acm:eu-west-1:ACCOUNT:certificate/CERT-ID"
       },
       "waf": {
         "enabled": true,
-        "webAclArn": "arn:aws:wafv2:us-east-1:ACCOUNT:global/webacl/NAME/ID"
+        "webAclArn": "arn:aws:wafv2:eu-west-1:ACCOUNT:global/webacl/NAME/ID"
       }
     }
   },
@@ -170,7 +170,7 @@
   },
   "disaster_recovery": {
     "enabled": true,
-    "secondaryRegion": "us-west-2",
+    "secondaryRegion": "eu-central-1",
     "rto": 4,
     "rpo": 1
   }

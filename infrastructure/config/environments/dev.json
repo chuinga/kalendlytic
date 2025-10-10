@@ -1,6 +1,6 @@
 {
   "environment": "dev",
-  "region": "us-east-1",
+  "region": "eu-west-1",
   "account": "${CDK_DEFAULT_ACCOUNT}",
   "stackPrefix": "meeting-scheduling-agent-dev",
   "tags": {

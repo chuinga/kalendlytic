@@ -10,7 +10,7 @@ class BedrockConfig:
     """Configuration class for Bedrock client settings."""
     
     # Default AWS region for Bedrock
-    DEFAULT_REGION = "us-east-1"
+    DEFAULT_REGION = "eu-west-1"
     
     # Model configuration
     MODEL_ID = "amazon.nova-pro-v1:0"

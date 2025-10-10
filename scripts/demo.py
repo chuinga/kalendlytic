@@ -325,10 +325,10 @@ class DemoRunner:
 def main():
     """Main demo execution function"""
     # Get configuration from environment
-    api_url = os.getenv("DEMO_API_URL", "https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com")
+    api_url = os.getenv("DEMO_API_URL", "https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com")
     demo_email = os.getenv("DEMO_USER_EMAIL", "demo@example.com")
     
-    if not api_url or api_url == "https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com":
+    if not api_url or api_url == "https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com":
         print("❌ Please set DEMO_API_URL environment variable to your deployed API Gateway URL")
         sys.exit(1)
         

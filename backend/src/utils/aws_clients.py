@@ -10,7 +10,7 @@ from typing import Optional
 def get_boto3_config() -> Config:
     """Get standardized boto3 configuration."""
     return Config(
-        region_name='us-east-1',  # TODO: Make configurable via environment
+        region_name='eu-west-1',  # TODO: Make configurable via environment
         retries={
             'max_attempts': 3,
             'mode': 'adaptive'

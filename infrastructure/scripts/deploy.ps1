@@ -7,7 +7,7 @@ param(
     [string]$Environment = "dev",
     
     [Parameter(HelpMessage="AWS region")]
-    [string]$Region = "us-east-1",
+    [string]$Region = "eu-west-1",
     
     [Parameter(HelpMessage="AWS profile to use")]
     [string]$Profile = "",
@@ -69,7 +69,7 @@ Deploy AWS Meeting Scheduling Agent infrastructure using CDK
 
 OPTIONS:
     -Environment ENV     Environment to deploy (dev, staging, prod) [default: dev]
-    -Region REGION       AWS region [default: us-east-1]
+    -Region REGION       AWS region [default: eu-west-1]
     -Profile PROFILE     AWS profile to use
     -BootstrapOnly       Only run CDK bootstrap
     -Rollback           Rollback to previous deployment
@@ -79,7 +79,7 @@ OPTIONS:
     -Help               Show this help message
 
 EXAMPLES:
-    .\deploy.ps1 -Environment dev -Region us-east-1
+    .\deploy.ps1 -Environment dev -Region eu-west-1
     .\deploy.ps1 -Environment prod -Profile production-profile -Force
     .\deploy.ps1 -BootstrapOnly -Environment staging
     .\deploy.ps1 -Rollback -Environment dev

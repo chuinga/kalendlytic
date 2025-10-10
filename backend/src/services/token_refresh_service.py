@@ -617,7 +617,7 @@ class TokenRefreshService:
             # Send SNS notification for critical alerts
             if alert['severity'] == 'CRITICAL':
                 sns = boto3.client('sns')
-                topic_arn = f"arn:aws:sns:us-east-1:123456789012:token-refresh-alerts"  # TODO: Make configurable
+                topic_arn = f"arn:aws:sns:eu-west-1:123456789012:token-refresh-alerts"  # TODO: Make configurable
                 
                 try:
                     sns.publish(

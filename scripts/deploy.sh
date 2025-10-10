@@ -37,7 +37,7 @@ fi
 
 # Get AWS account and region
 AWS_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
-AWS_REGION=$(aws configure get region || echo "us-east-1")
+AWS_REGION=$(aws configure get region || echo "eu-west-1")
 
 echo "✅ AWS Account: $AWS_ACCOUNT"
 echo "✅ AWS Region: $AWS_REGION"

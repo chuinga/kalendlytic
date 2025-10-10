@@ -248,8 +248,8 @@ class TestLoggingConfig:
     
     def test_archive_bucket_name_generation(self):
         """Test archive bucket name generation."""
-        bucket_name = LoggingConfig.get_archive_bucket_name('123456789012', 'us-east-1')
-        assert bucket_name == 'meeting-agent-logs-archive-123456789012-us-east-1'
+        bucket_name = LoggingConfig.get_archive_bucket_name('123456789012', 'eu-west-1')
+        assert bucket_name == 'meeting-agent-logs-archive-123456789012-eu-west-1'
 
 
 if __name__ == '__main__':

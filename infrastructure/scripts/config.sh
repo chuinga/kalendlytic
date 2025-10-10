@@ -8,7 +8,7 @@ export PROJECT_NAME="meeting-scheduling-agent"
 export PROJECT_VERSION="1.0.0"
 
 # Default AWS configuration
-export DEFAULT_REGION="us-east-1"
+export DEFAULT_REGION="eu-west-1"
 export DEFAULT_ENVIRONMENT="dev"
 
 # Stack naming patterns

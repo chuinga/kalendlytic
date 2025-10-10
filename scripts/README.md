@@ -17,7 +17,7 @@ Interactive demonstration of all key features including:
 **Usage:**
 ```bash
 # Set environment variables
-export DEMO_API_URL="https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com"
+export DEMO_API_URL="https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com"
 export DEMO_USER_EMAIL="demo@example.com"
 export DEMO_USER_PASSWORD="DemoPass123!"
 
@@ -36,14 +36,14 @@ Creates realistic test data for demonstration and testing:
 **Usage:**
 ```bash
 # Generate test data for 5 users
-python3 scripts/generate_test_data.py --users 5 --region us-east-1
+python3 scripts/generate_test_data.py --users 5 --region eu-west-1
 
 # Generate and write to DynamoDB
 python3 scripts/generate_test_data.py --users 10 --write-db --export-json test_data.json
 
 # Options:
 #   --users N          Number of demo users (default: 5)
-#   --region REGION    AWS region (default: us-east-1)
+#   --region REGION    AWS region (default: eu-west-1)
 #   --write-db         Write data to DynamoDB tables
 #   --export-json FILE Export data to JSON file
 ```
@@ -59,7 +59,7 @@ Comprehensive performance testing suite:
 ```bash
 # Basic load test
 python3 scripts/performance_test.py \
-    --api-url "https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com" \
+    --api-url "https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com" \
     --test-type load \
     --users 50 \
     --requests 10 \
@@ -67,12 +67,12 @@ python3 scripts/performance_test.py \
 
 # Stress test
 python3 scripts/performance_test.py \
-    --api-url "https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com" \
+    --api-url "https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com" \
     --test-type stress
 
 # All tests
 python3 scripts/performance_test.py \
-    --api-url "https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com" \
+    --api-url "https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com" \
     --test-type all \
     --output performance_report.json
 
@@ -104,12 +104,12 @@ python3 scripts/deployment_verification.py
 
 # Custom configuration
 python3 scripts/deployment_verification.py \
-    --region us-west-2 \
+    --region eu-west-1 \
     --stack-prefix MyMeetingScheduler \
     --output verification_report.json
 
 # Options:
-#   --region REGION       AWS region (default: us-east-1)
+#   --region REGION       AWS region (default: eu-west-1)
 #   --stack-prefix PREFIX CloudFormation stack prefix (default: MeetingScheduler)
 #   --output FILE         Output file for verification report
 ```
@@ -120,9 +120,9 @@ Runs all testing scripts in sequence for complete validation:
 **Usage:**
 ```bash
 # Set environment variables
-export DEMO_API_URL="https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com"
+export DEMO_API_URL="https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com"
 export DEMO_USER_EMAIL="demo@example.com"
-export AWS_REGION="us-east-1"
+export AWS_REGION="eu-west-1"
 export STACK_PREFIX="MeetingScheduler"
 
 # Make executable and run
@@ -145,7 +145,7 @@ aws configure
 # OR set environment variables:
 export AWS_ACCESS_KEY_ID="your-access-key"
 export AWS_SECRET_ACCESS_KEY="your-secret-key"
-export AWS_DEFAULT_REGION="us-east-1"
+export AWS_DEFAULT_REGION="eu-west-1"
 ```
 
 ### Environment Variables
@@ -153,12 +153,12 @@ Set the following environment variables for testing:
 
 ```bash
 # Required for demo and performance testing
-export DEMO_API_URL="https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com"
+export DEMO_API_URL="https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com"
 export DEMO_USER_EMAIL="demo@example.com"
 export DEMO_USER_PASSWORD="DemoPass123!"
 
 # Optional AWS configuration
-export AWS_REGION="us-east-1"
+export AWS_REGION="eu-west-1"
 export STACK_PREFIX="MeetingScheduler"
 ```
 

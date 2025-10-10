@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/config.sh"
 
 # Default values
 ENVIRONMENT="dev"
-REGION="us-east-1"
+REGION="eu-west-1"
 PROFILE=""
 VERBOSE=false
 DETAILED=false
@@ -53,7 +53,7 @@ Validate AWS Meeting Scheduling Agent deployment
 
 OPTIONS:
     -e, --environment ENV   Environment to validate (dev, staging, prod) [default: dev]
-    -r, --region REGION     AWS region [default: us-east-1]
+    -r, --region REGION     AWS region [default: eu-west-1]
     -p, --profile PROFILE   AWS profile to use
     -d, --detailed         Perform detailed validation checks
     -v, --verbose          Enable verbose output

@@ -46,7 +46,7 @@ class BedrockClient:
     INPUT_TOKEN_COST_PER_1K = 0.0008
     OUTPUT_TOKEN_COST_PER_1K = 0.0032
     
-    def __init__(self, region_name: str = "us-east-1", max_retries: int = 3):
+    def __init__(self, region_name: str = "eu-west-1", max_retries: int = 3):
         self.region_name = region_name
         self.max_retries = max_retries
         

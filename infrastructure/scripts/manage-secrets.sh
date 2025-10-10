@@ -12,7 +12,7 @@ PROJECT_NAME="meeting-scheduling-agent"
 
 # Default values
 ENVIRONMENT="dev"
-REGION="us-east-1"
+REGION="eu-west-1"
 PROFILE=""
 ACTION="list"
 SECRET_NAME=""
@@ -62,7 +62,7 @@ ACTIONS:
 
 OPTIONS:
     -e, --environment ENV   Environment (dev, staging, prod) [default: dev]
-    -r, --region REGION     AWS region [default: us-east-1]
+    -r, --region REGION     AWS region [default: eu-west-1]
     -p, --profile PROFILE   AWS profile to use
     -v, --verbose          Enable verbose output
     -d, --dry-run          Show what would be done

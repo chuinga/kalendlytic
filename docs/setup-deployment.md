@@ -119,7 +119,7 @@ Create environment configuration files:
 ```bash
 # Create backend/.env
 cat > backend/.env << EOF
-AWS_REGION=us-east-1
+AWS_REGION=eu-west-1
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 MICROSOFT_CLIENT_ID=your-microsoft-client-id
@@ -135,7 +135,7 @@ cat > frontend/.env.local << EOF
 NEXT_PUBLIC_API_URL=https://your-api-gateway-url
 NEXT_PUBLIC_COGNITO_USER_POOL_ID=your-user-pool-id
 NEXT_PUBLIC_COGNITO_CLIENT_ID=your-cognito-client-id
-NEXT_PUBLIC_AWS_REGION=us-east-1
+NEXT_PUBLIC_AWS_REGION=eu-west-1
 EOF
 ```
 
@@ -144,9 +144,9 @@ EOF
 # Create infrastructure/.env
 cat > infrastructure/.env << EOF
 AWS_ACCOUNT_ID=123456789012
-AWS_REGION=us-east-1
+AWS_REGION=eu-west-1
 DOMAIN_NAME=your-domain.com  # Optional
-CERTIFICATE_ARN=arn:aws:acm:us-east-1:123456789012:certificate/xxx  # Optional
+CERTIFICATE_ARN=arn:aws:acm:eu-west-1:123456789012:certificate/xxx  # Optional
 EOF
 ```
 

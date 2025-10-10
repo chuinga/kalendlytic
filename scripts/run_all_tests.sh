@@ -12,9 +12,9 @@ echo "🚀 AWS Meeting Scheduling Agent - Complete Testing Suite"
 echo "======================================================="
 
 # Configuration
-API_URL=${DEMO_API_URL:-"https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com"}
+API_URL=${DEMO_API_URL:-"https://your-api-gateway-url.execute-api.eu-west-1.amazonaws.com"}
 DEMO_USER_EMAIL=${DEMO_USER_EMAIL:-"demo@example.com"}
-AWS_REGION=${AWS_REGION:-"us-east-1"}
+AWS_REGION=${AWS_REGION:-"eu-west-1"}
 STACK_PREFIX=${STACK_PREFIX:-"MeetingScheduler"}
 
 echo "Configuration:"

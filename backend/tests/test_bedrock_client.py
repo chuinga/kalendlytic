@@ -24,7 +24,7 @@ class TestBedrockClient:
             mock_boto3.return_value = Mock()
             client = BedrockClient()
             
-            assert client.region_name == "us-east-1"
+            assert client.region_name == "eu-west-1"
             assert client.max_retries == 3
             assert client.MODEL_ID == "amazon.nova-pro-v1:0"
     

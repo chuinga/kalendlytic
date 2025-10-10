@@ -9,7 +9,7 @@ import { MonitoringStack } from './stacks/monitoring-stack';
 const app = new cdk.App();
 
 // Get environment configuration from CDK context
-const region = app.node.tryGetContext('meeting-scheduling-agent:region') || 'us-east-1';
+const region = app.node.tryGetContext('meeting-scheduling-agent:region') || 'eu-west-1';
 const environment = app.node.tryGetContext('meeting-scheduling-agent:environment') || 'dev';
 const account = process.env.CDK_DEFAULT_ACCOUNT;
 

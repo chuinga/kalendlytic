@@ -129,7 +129,7 @@ This guide helps you diagnose and resolve common issues with the AWS Meeting Sch
 **Solutions:**
 1. **Verify Bedrock model access:**
    ```bash
-   aws bedrock list-foundation-models --region us-east-1
+   aws bedrock list-foundation-models --region eu-west-1
    aws bedrock get-model --model-identifier anthropic.claude-3-5-sonnet-20241022-v2:0
    ```
 
@@ -153,7 +153,7 @@ This guide helps you diagnose and resolve common issues with the AWS Meeting Sch
 3. **Test Bedrock connectivity:**
    ```python
    import boto3
-   bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+   bedrock = boto3.client('bedrock-runtime', region_name='eu-west-1')
    response = bedrock.invoke_model(
        modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',
        body=json.dumps({

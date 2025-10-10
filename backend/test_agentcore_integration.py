@@ -25,7 +25,7 @@ except ImportError as e:
     
     # Create minimal test implementations
     class MockBedrockClient:
-        def __init__(self, region_name="us-east-1"):
+        def __init__(self, region_name="eu-west-1"):
             self.region_name = region_name
     
     class MockTaskType:
@@ -41,7 +41,7 @@ def test_bedrock_client():
     
     try:
         # Test client initialization (will fail without AWS credentials, but should not crash)
-        client = BedrockClient(region_name="us-east-1")
+        client = BedrockClient(region_name="eu-west-1")
         print("✓ Bedrock client initialized successfully")
         
         # Test prompt generation

@@ -18,7 +18,7 @@ import argparse
 class TestDataGenerator:
     """Generates comprehensive test data for the meeting scheduling agent"""
     
-    def __init__(self, region: str = "us-east-1"):
+    def __init__(self, region: str = "eu-west-1"):
         self.region = region
         self.dynamodb = boto3.resource('dynamodb', region_name=region)
         
@@ -402,7 +402,7 @@ class TestDataGenerator:
 def main():
     parser = argparse.ArgumentParser(description="Generate test data for AWS Meeting Scheduling Agent")
     parser.add_argument("--users", type=int, default=5, help="Number of demo users to generate")
-    parser.add_argument("--region", default="us-east-1", help="AWS region")
+    parser.add_argument("--region", default="eu-west-1", help="AWS region")
     parser.add_argument("--write-db", action="store_true", help="Write data to DynamoDB tables")
     parser.add_argument("--export-json", default="test_data.json", help="Export data to JSON file")
     

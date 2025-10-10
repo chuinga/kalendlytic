@@ -12,7 +12,7 @@ PROJECT_NAME="meeting-scheduling-agent"
 
 # Default values
 ENVIRONMENT="dev"
-REGION="us-east-1"
+REGION="eu-west-1"
 PROFILE=""
 VERBOSE=false
 DRY_RUN=false
@@ -53,7 +53,7 @@ Rollback AWS Meeting Scheduling Agent infrastructure
 
 OPTIONS:
     -e, --environment ENV       Environment (dev, staging, prod) [default: dev]
-    -r, --region REGION         AWS region [default: us-east-1]
+    -r, --region REGION         AWS region [default: eu-west-1]
     -p, --profile PROFILE       AWS profile to use
     -v, --version VERSION       Rollback to specific version/changeset
     -f, --force                 Force rollback without confirmation
@@ -68,7 +68,7 @@ ROLLBACK STRATEGIES:
     3. Selective rollback: Rollback specific stacks only
 
 EXAMPLES:
-    $0 -e dev -r us-east-1
+    $0 -e dev -r eu-west-1
     $0 -e prod -v changeset-123 --force
     $0 --dry-run -e staging
     $0 --no-backup -e dev

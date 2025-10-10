@@ -29,7 +29,7 @@ def test_bedrock_client():
         
         # Test client can be initialized (will fail AWS connection but class should work)
         try:
-            client = BedrockClient(region_name="us-east-1")
+            client = BedrockClient(region_name="eu-west-1")
             print("✓ Bedrock client class initialized")
         except Exception as e:
             # Expected to fail without AWS credentials, but class should exist

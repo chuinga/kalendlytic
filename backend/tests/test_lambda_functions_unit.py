@@ -15,7 +15,7 @@ os.environ.update({
     'PREFERENCES_TABLE': 'test-preferences',
     'PRIORITIES_TABLE': 'test-priorities',
     'KMS_KEY_ID': 'test-key-id',
-    'AWS_DEFAULT_REGION': 'us-east-1'
+    'AWS_DEFAULT_REGION': 'eu-west-1'
 })
 
 

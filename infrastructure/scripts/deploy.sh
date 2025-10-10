@@ -12,7 +12,7 @@ PROJECT_NAME="meeting-scheduling-agent"
 
 # Default values
 ENVIRONMENT="dev"
-REGION="us-east-1"
+REGION="eu-west-1"
 PROFILE=""
 BOOTSTRAP_ONLY=false
 ROLLBACK=false
@@ -53,7 +53,7 @@ Deploy AWS Meeting Scheduling Agent infrastructure using CDK
 
 OPTIONS:
     -e, --environment ENV    Environment to deploy (dev, staging, prod) [default: dev]
-    -r, --region REGION      AWS region [default: us-east-1]
+    -r, --region REGION      AWS region [default: eu-west-1]
     -p, --profile PROFILE    AWS profile to use
     -b, --bootstrap-only     Only run CDK bootstrap
     -R, --rollback          Rollback to previous deployment
@@ -63,7 +63,7 @@ OPTIONS:
     -h, --help              Show this help message
 
 EXAMPLES:
-    $0 -e dev -r us-east-1
+    $0 -e dev -r eu-west-1
     $0 -e prod -p production-profile --force
     $0 --bootstrap-only -e staging
     $0 --rollback -e dev

@@ -45,7 +45,7 @@ class ToolMetrics:
 class LogAggregator:
     """Utility for aggregating and analyzing agent logs."""
     
-    def __init__(self, region: str = 'us-east-1'):
+    def __init__(self, region: str = 'eu-west-1'):
         self.logs_client = boto3.client('logs', region_name=region)
         self.s3_client = boto3.client('s3', region_name=region)
         self.region = region
@@ -353,6 +353,6 @@ class LogAggregator:
             return f"aggregated-logs/unknown/{timestamp.strftime('%Y/%m/%d')}/{data_type}.json"
 
 
-def create_log_aggregator(region: str = 'us-east-1') -> LogAggregator:
+def create_log_aggregator(region: str = 'eu-west-1') -> LogAggregator:
     """Create a log aggregator instance."""
     return LogAggregator(region)

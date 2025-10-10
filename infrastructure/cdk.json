@@ -58,7 +58,7 @@
     "@aws-cdk/aws-kms:reduceCrossAccountRegionPolicyScope": true,
     "@aws-cdk/aws-opensearchservice:enforceHttps": true,
     "@aws-cdk/aws-s3:enforceSSL": true,
-    "meeting-scheduling-agent:region": "us-east-1",
+    "meeting-scheduling-agent:region": "eu-west-1",
     "meeting-scheduling-agent:environment": "dev"
   }
 }

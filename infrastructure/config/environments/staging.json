@@ -1,6 +1,6 @@
 {
   "environment": "staging",
-  "region": "us-east-1",
+  "region": "eu-west-1",
   "account": "${CDK_DEFAULT_ACCOUNT}",
   "stackPrefix": "meeting-scheduling-agent-staging",
   "tags": {
@@ -78,7 +78,7 @@
       "customDomain": {
         "enabled": true,
         "domainName": "staging.meeting-scheduler.example.com",
-        "certificateArn": "arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID"
+        "certificateArn": "arn:aws:acm:eu-west-1:ACCOUNT:certificate/CERT-ID"
       }
     }
   },

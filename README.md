@@ -90,7 +90,7 @@ aws-meeting-scheduling-agent/
 2. **Update key variables in `.env`:**
    ```bash
    # AWS Configuration
-   AWS_REGION=us-east-1
+   AWS_REGION=eu-west-1
    AWS_ACCOUNT_ID=your-account-id
    
    # OAuth Credentials (required for calendar integration)

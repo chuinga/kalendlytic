@@ -26,7 +26,7 @@ class TestGoogleOAuthFlows:
         """Set up mocked AWS services."""
         with mock_aws():
             # Create DynamoDB table
-            dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+            dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
             table = dynamodb.create_table(
                 TableName='Connections',
                 KeySchema=[{'AttributeName': 'pk', 'KeyType': 'HASH'}],
@@ -35,7 +35,7 @@ class TestGoogleOAuthFlows:
             )
             
             # Create Secrets Manager secret
-            secrets_client = boto3.client('secretsmanager', region_name='us-east-1')
+            secrets_client = boto3.client('secretsmanager', region_name='eu-west-1')
             secrets_client.create_secret(
                 Name='google-oauth-credentials',
                 SecretString=json.dumps({
@@ -45,7 +45,7 @@ class TestGoogleOAuthFlows:
             )
             
             # Create KMS key
-            kms_client = boto3.client('kms', region_name='us-east-1')
+            kms_client = boto3.client('kms', region_name='eu-west-1')
             key_response = kms_client.create_key(Description='Test key for OAuth tokens')
             
             yield {

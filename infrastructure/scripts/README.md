@@ -30,10 +30,10 @@ This directory contains deployment automation scripts for the AWS Meeting Schedu
 
 ```bash
 # Bootstrap for development environment
-./scripts/bootstrap.sh -e dev -r us-east-1
+./scripts/bootstrap.sh -e dev -r eu-west-1
 
 # Bootstrap for production with specific profile
-./scripts/bootstrap.sh -e prod -r us-east-1 -p production-profile
+./scripts/bootstrap.sh -e prod -r eu-west-1 -p production-profile
 ```
 
 ### 2. Deploy Infrastructure
@@ -78,7 +78,7 @@ Each environment has its own configuration file in `config/environments/`:
 ```json
 {
   "environment": "dev",
-  "region": "us-east-1",
+  "region": "eu-west-1",
   "stackPrefix": "meeting-scheduling-agent-dev",
   "tags": { ... },
   "core": {

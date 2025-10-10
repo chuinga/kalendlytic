@@ -1,254 +1,319 @@
-() main":
-   ain____ == "__mf __name1)
+#!/usr/bin/env python3
+"""
+Deployment Verification Script for AWS Meeting Scheduling Agent
 
-iss else 0 if succesys.exit(      
-    ion()
-  verificatcomplete_.run_s = verifier
-    succesprefix).stack_x=argsrefick_p, stas.regionion=arger(regrifiymentVeeploerifier = D   v 
- ()
-   rgsser.parse_a= par  args    
-  ")
- ack prefix studFormationelp="Cloler", htingScheduult="Mee, defaix"preftack---sargument(" parser.add_  ")
- gion="AWS reelp", h="us-east-1efaultregion", dt("--.add_argumen
-    parsert")menployent deuling Ag Schedeting MeVerify AWStion="escripentParser(drse.Argumpaer = arg
-    pars
-def main():l_success
-overal    return    
-    
-         needed.")oy as and redeplve es abothe issuase review "Plent(pri            ILED")
-FAIFICATION LOYMENT VERDEPn❌ ("\rint   p:
-           else!")
-      ady for uset is reing Agenulg SchedtinS Mee"Your AW     print(")
-       SEDTION PASFICAT VERIEPLOYMEN✅ Dt("\nin   pr
-         l_success: if overal 
-             ealthy
-  and api_hmbda_healthyalthy and lay and db_he= cf_healthsuccess  overall_             
- 
-     dpoint}")pi_en{aoint:  Endpn🔗 APIrint(f"\        p:
-    endpoint    if api_  
-    
-      f}%")else 0:.1cks > 0 if total_checks * 100) total_cheks / hec(passed_ccess Rate: {"Sucrint(f p
-       cks}")iled_chefaed: {ilFaprint(f"   }")
-     cksd_chesed: {passe(f"Pasprint       }")
- otal_checks Checks: {tf"Total     print(   
- )
-       ()
-        eslts.valuion_resuverificatts in self.r resul         fo) 
-    'FAIL']==atus'] 'st if r[esultsr for r in rlen([            s = sum(
-d_checkfaile
-               )s()
- ts.valuetion_resul.verifican selfs i result for         ASS']) 
-  ] == 'Ps'statu r['esults if for r in r len([r          um(
- _checks = s    passed
-    s())alues.vn_resulterificatiots in self.v resullts) for(len(resucks = sum total_che   
-         
-   =" * 70)(" print
-       UMMARY")IFICATION S VERnt("📊ri  p)
-      " * 70\n" + "= print("t
-       porinal reenerate f  # G        
-y()
-      atewapi_glf.verify_a se =ndpointlthy, api_e    api_hea
-    ions()lambda_functverify_f.= selalthy _heda     lamb   
-b_tables()fy_dynamodverithy = self.    db_heals()
-    mation_stack_cloudforlf.verifyhealthy = se       cf_
-  stepsficationun all veri        # R      
- * 70)
-  "="rint(   p   
-  n")icatioment Verifgent Deployg Aindulheng Sceti MeStarting AWS print("🚀 
-       ation"""ent verifice deploymetun compl""R     "    -> bool:
-on(self)icatiete_verif run_compl 
-    def           lse, None
-urn Fa    ret      
-  str(e)}")way: {I Gatechecking AP"Error AIL", f, "Fteway"t("API Gaesul  self.log_r         e:
-  r asErrocept Client ex  
-              None
-    e,turn Fals  re          
-t found")"API noL", AI"Fateway", I Gesult("APf.log_r   sel               
-              endpoint
-api_eturn True,      r                    
-              }")
-     led: {str(e)heck fai cealthf"H                                    WARN", 
-  ", "I Gateway("APlog_result  self.                 e:
-       aseptionquestExc.Rept requests exce                   )
-de}"tus_coe.stalth_responsea{hreturned th check      f"Heal                                     "WARN", 
-teway", ult("API Gag_res   self.lo                     
-      else:                    
-  esponding") rintk endpohec, "Health cPASS"way", "Gateesult("API log_r     self.                       200:
-us_code == esponse.stat_rf health  i                
-      10)imeout=h", tpoint}/healtf"{api_endsts.get(nse = requeealth_respo           h           
-       try:              ity
- ectivconnic  Test bas        #    
-                     ")
-       point})api_endName']} ({api['I found: {"AP      f                    
-        PASS", , "PI Gateway"result("A self.log_               
-                 "
-       onaws.comazon}.ami.{self.regicute-ap{api_id}.exe//ps:"httpoint = fendpi_       a           d']
-  piI_id = api['A   api               er():
-  '].lowapi['Namelower() in prefix.lf.stack_      if se
-          Items']:[' in responseor api    f
-                
-    = Noned      api_i     apis()
-  .get_wayapigatee = self.spons     re    I
-   AP find our ist APIs to       # Ly:
-          tr 
-   ")
-       teway...GaI rifying AP🔍 Ve("\n       print
- """accessibleand d eployeateway is dAPI G"Verify ""      
-  r]:st[bool, f) -> Tupleselateway(pi_gdef verify_a      
- y
-     alth_heionsfuncturn all_ret
-                       
- False_healthy = ns all_functio            )
-   (e)}" error: {strtion_name}{func"Function   f                           ", 
- da", "FAILesult("Lamb_rog  self.l              rror as e:
-ientEt Clcep       ex  
-              
-         selthy = Falunctions_heal_f       al            e}")
-  {statame} state:{function_nunction f"F                               AIL", 
-   bda", "Fesult("Lamlf.log_r        se            else:
-           
-     ")ed})ast_modifid: {l (modifieve actie} ision_namion {funct f"Funct                         
-        PASS", Lambda", "_result(" self.log                   ive':
-tate == 'Act   if s               
-    
-          ']edtModifion']['Lasonfigurationse['Cespodified = r_m    last           State']
- ']['rationiguonse['Conf= resp state           e)
-     n_namll_functiotionName=funcon(Functint.get_fumbda_cliee = self.laons   resp      
-        try:       
-    ion_name}"ix}-{funct.stack_pref= f"{selfon_name tincull_fu         f
-   ctions:expected_fun_name in nctionor fu    f  
-          y = True
-tions_healthncfu       all_        
-         ]
+This script verifies that all AWS resources are properly deployed and configured.
+"""
 
-ndler"erencesHa, "PrefdarHandler"alen      "C     ndler",
- HaAgentr", "onHandleti "ConnechHandler",      "Aut     [
- unctions = cted_fexpe           
-  ..")
-   ns.tioLambda Funcfying ("\n🔍 Veri print   "
-     healthy""loyed ands are depfunctionl Lambda "Verify al     ""l:
-   self) -> boounctions(ambda_ferify_l    def v
+import argparse
+import boto3
+import json
+import sys
+from datetime import datetime
+from typing import Dict, List, Any, Optional
+
+class DeploymentVerifier:
+    """Comprehensive deployment verification for the meeting scheduling agent."""
+    
+    def __init__(self, region: str = "eu-west-1", stack_prefix: str = "MeetingScheduler"):
+        self.region = region
+        self.stack_prefix = stack_prefix
         
-healthyll_tables_   return a    
-               e
-  lsFas_healthy = ablel_t       al        
- e)}")or: {str(errname} e_ {tabl"Table     f                       
-   "FAIL", "DynamoDB",ult(.log_reself  s           
-   as e:ClientError pt xce          e  
-                 e
-   alshy = Fs_healt_table   all           
-      ")status}le_tus: {tab_name} sta{tablele   f"Tab                                ", 
-", "FAILoDBDynamog_result("      self.l       :
-              else         ms)")
-tet} iunve ({item_co is actiname}{table_ f"Table                              , 
-     "PASS"oDB","Dynam_result(lf.log se                VE':
-   s == 'ACTIable_statu if t                
-             nt']
-  temCouable']['I'Tse[= respon_count tem     i     
-      tus']eSta]['Tabl'Table' = response[tus  table_sta           )
-   ameull_table_nbleName=fle(Tae_tabescribnamodb.de = self.dy     respons      try:
-                 }"
-meble_na{taix}-ack_preff.st{selme = f"le_natab      full_      
-ted_tables:n expece_name i   for tabl         
- ue
-   althy = Tres_hel_tabl        al
- ]
-            "
-   "AuditLogsRuns", "Agentngs",    "Meeti         rences", 
-refe, "Pions", "Connectsers"       "U = [
-     escted_tablpe ex   
-          es...")
-  amoDB TablDyn🔍 Verifying ("\n    print"""
-    end are activ exist aes tabl DynamoDB"Verify all ""      l:
- booelf) -> les(s_tabdynamodb def verify_        
+        # Initialize AWS clients
+        self.cloudformation = boto3.client('cloudformation', region_name=region)
+        self.dynamodb = boto3.client('dynamodb', region_name=region)
+        self.lambda_client = boto3.client('lambda', region_name=region)
+        self.apigateway = boto3.client('apigateway', region_name=region)
+        self.cognito_idp = boto3.client('cognito-idp', region_name=region)
+        self.s3 = boto3.client('s3', region_name=region)
+        self.cloudfront = boto3.client('cloudfront', region_name=region)
+        self.secretsmanager = boto3.client('secretsmanager', region_name=region)
+        self.bedrock = boto3.client('bedrock', region_name=region)
+        
+        self.verification_results = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'region': region,
+            'stack_prefix': stack_prefix,
+            'checks': {},
+            'overall_status': 'UNKNOWN'
+        }
 
-   ks_healthyn all_stac      retur 
-                  = False
-thytacks_healall_s              }")
-  r(e)name}: {ststack_ng {kiError checFAIL", f""tion", dFormaesult("Cloug_r     self.lo     
-                else:        d")
-  unfok_name} not tactack {s"SL", f", "FAIionrmatt("CloudFoog_resulself.l             :
-       Error'Validation= ']['Code'] =rror'se['Ef e.respon         i
-       r as e:lientErro    except C         
-             lse
-      ealthy = Fal_stacks_h  al        
-          us}"){stat} status: _name {stack, f"Stack"FAIL"", ationoudFormult("Cl.log_reslf   se              e:
-   ls   e         
-    ")ealthyame} is htack_n{stack f"S"PASS", ation", "CloudFormt(_resul    self.log            :
-    E']MPLETDATE_CO', 'UPATE_COMPLETE['CREf status in     i             
-               Status']
-ack['Stackstatus =      st           [0]
-e['Stacks']= respons      stack        e)
-   stack_namStackName=acks(ibe_stn.descrloudformatio self.cesponse =     r
-           try:     ks:
-       stacin expected_stack_name   for  
-      ue
-       hy = Tracks_healtll_st 
-        a       ]
-        ing"
-torni}-Moprefixstack_self.   f"{
-         ",ix}-Webprefelf.stack_      f"{s", 
-      refix}-Apistack_pelf.     f"{s,
-       re"efix}-Coprstack_f"{self.          [
-   = _stacks    expected     
-    .")
-   s..ackStation oudFormerifying Clt("\n🔍 Vprin        "
-""essfullyed succeploye dacks arn stormatioudFy all Clo""Verif "   ool:
-    > b -ks(self)tacrmation_s_cloudfodef verify
-            })
-    tamp
-    ": timestimestamp   "      ,
-   ls or {}": detai "details      
-     e,ssagssage": me  "me    tus,
-      ": sta  "status          append({
-component].ts[ion_resulficat   self.veri 
+    def verify_cloudformation_stacks(self) -> bool:
+        """Verify CloudFormation stacks are deployed and in good state."""
+        try:
+            stacks = self.cloudformation.list_stacks(
+                StackStatusFilter=['CREATE_COMPLETE', 'UPDATE_COMPLETE']
+            )
             
-    = []mponent] ts[coresulerification_  self.v
-          sults:reication_rif.vet in selfcomponent no        if     
-")
-    {message}nent}: mpoicon} {co{status_mp}] "[{timesta   print(f  
-     
-      ️""⚠" else == "FAILf status  i "❌" else"PASS"=  status = = "✅" iftatus_icon
-        s:%M:%S")ime("%Hftow().stratetime.n = dstampme  ti
-      lt"""cation resuerifi"Log v     ""   ne):
-Dict = No, details:  stre:r, messag, status: stponent: strt(self, comg_resul loef d    
-   
-        ) sys.exit(1          es.")
- iablronment varet enviI or sure AWS CL configaseleound. Pials not f AWS credentnt("❌      prior:
-      lsErredentiacept NoCr    exgion)
-    ame=reion_n', regtsmanagersecreo3.client('er = botsecretsmanaglf.    se    
-    ame=region), region_nudfront'nt('clolieto3.cfront = boself.cloud           e=region)
- ion_nam('s3', regentli= boto3.c.s3    self       ion)
-  ion_name=regidp', reg('cognito-3.clientgnito = boto.co   self
-         name=region) region_igatewayv2',t('ap3.clienteway = boto  self.apiga     gion)
-     gion_name=re', rent('lambdato3.clie= bobda_client   self.lam     n)
-     ioregme=region_na'dynamodb', o3.client(db = botelf.dynamo        sion)
-    n_name=regn', regioatiorment('cloudfoli = boto3.cdformationou  self.cl
-                  try:ents
-cliize AWS al Initi     #  
-   {}
-      results = fication_   self.verix
-     k_prefiac_prefix = stackf.st    sel
-    ionon = reg   self.regi  "):
-   Scheduler = "Meeting_prefix: str", stack"us-east-1= on: str self, regi__(_initef _
+            relevant_stacks = [
+                stack for stack in stacks['StackSummaries']
+                if self.stack_prefix.lower() in stack['StackName'].lower()
+            ]
+            
+            if not relevant_stacks:
+                self.verification_results['checks']['cloudformation'] = {
+                    'status': 'FAILED',
+                    'message': f'No stacks found with prefix {self.stack_prefix}'
+                }
+                return False
+            
+            self.verification_results['checks']['cloudformation'] = {
+                'status': 'PASSED',
+                'stacks': [stack['StackName'] for stack in relevant_stacks],
+                'count': len(relevant_stacks)
+            }
+            return True
+            
+        except Exception as e:
+            self.verification_results['checks']['cloudformation'] = {
+                'status': 'ERROR',
+                'error': str(e)
+            }
+            return False
+
+    def verify_dynamodb_tables(self) -> bool:
+        """Verify DynamoDB tables exist and are active."""
+        expected_tables = [
+            'Users', 'Connections', 'Calendars', 'Meetings', 
+            'Preferences', 'Priorities', 'AgentLogs'
+        ]
+        
+        try:
+            tables = self.dynamodb.list_tables()['TableNames']
+            
+            found_tables = []
+            missing_tables = []
+            
+            for expected_table in expected_tables:
+                # Look for tables that contain the expected name (accounting for prefixes)
+                matching_tables = [t for t in tables if expected_table.lower() in t.lower()]
+                if matching_tables:
+                    found_tables.extend(matching_tables)
+                else:
+                    missing_tables.append(expected_table)
+            
+            if missing_tables:
+                self.verification_results['checks']['dynamodb'] = {
+                    'status': 'FAILED',
+                    'found_tables': found_tables,
+                    'missing_tables': missing_tables
+                }
+                return False
+            
+            self.verification_results['checks']['dynamodb'] = {
+                'status': 'PASSED',
+                'tables': found_tables
+            }
+            return True
+            
+        except Exception as e:
+            self.verification_results['checks']['dynamodb'] = {
+                'status': 'ERROR',
+                'error': str(e)
+            }
+            return False
+
+    def verify_lambda_functions(self) -> bool:
+        """Verify Lambda functions are deployed."""
+        try:
+            functions = self.lambda_client.list_functions()['Functions']
+            
+            # Look for functions related to meeting scheduling
+            relevant_functions = [
+                func for func in functions
+                if any(keyword in func['FunctionName'].lower() 
+                      for keyword in ['meeting', 'schedule', 'oauth', 'agent'])
+            ]
+            
+            if not relevant_functions:
+                self.verification_results['checks']['lambda'] = {
+                    'status': 'FAILED',
+                    'message': 'No relevant Lambda functions found'
+                }
+                return False
+            
+            self.verification_results['checks']['lambda'] = {
+                'status': 'PASSED',
+                'functions': [func['FunctionName'] for func in relevant_functions],
+                'count': len(relevant_functions)
+            }
+            return True
+            
+        except Exception as e:
+            self.verification_results['checks']['lambda'] = {
+                'status': 'ERROR',
+                'error': str(e)
+            }
+            return False
+
+    def verify_api_gateway(self) -> bool:
+        """Verify API Gateway is deployed and accessible."""
+        try:
+            apis = self.apigateway.get_rest_apis()['items']
+            
+            # Look for APIs related to meeting scheduling
+            relevant_apis = [
+                api for api in apis
+                if any(keyword in api['name'].lower() 
+                      for keyword in ['meeting', 'schedule', 'agent'])
+            ]
+            
+            if not relevant_apis:
+                self.verification_results['checks']['apigateway'] = {
+                    'status': 'FAILED',
+                    'message': 'No relevant API Gateway found'
+                }
+                return False
+            
+            self.verification_results['checks']['apigateway'] = {
+                'status': 'PASSED',
+                'apis': [{'name': api['name'], 'id': api['id']} for api in relevant_apis]
+            }
+            return True
+            
+        except Exception as e:
+            self.verification_results['checks']['apigateway'] = {
+                'status': 'ERROR',
+                'error': str(e)
+            }
+            return False
+
+    def verify_cognito_user_pool(self) -> bool:
+        """Verify Cognito User Pool is configured."""
+        try:
+            user_pools = self.cognito_idp.list_user_pools(MaxResults=50)['UserPools']
+            
+            # Look for user pools related to meeting scheduling
+            relevant_pools = [
+                pool for pool in user_pools
+                if any(keyword in pool['Name'].lower() 
+                      for keyword in ['meeting', 'schedule', 'agent'])
+            ]
+            
+            if not relevant_pools:
+                self.verification_results['checks']['cognito'] = {
+                    'status': 'FAILED',
+                    'message': 'No relevant Cognito User Pool found'
+                }
+                return False
+            
+            self.verification_results['checks']['cognito'] = {
+                'status': 'PASSED',
+                'user_pools': [{'name': pool['Name'], 'id': pool['Id']} for pool in relevant_pools]
+            }
+            return True
+            
+        except Exception as e:
+            self.verification_results['checks']['cognito'] = {
+                'status': 'ERROR',
+                'error': str(e)
+            }
+            return False
+
+    def verify_bedrock_access(self) -> bool:
+        """Verify Bedrock model access."""
+        try:
+            # Try to list foundation models to verify access
+            models = self.bedrock.list_foundation_models()
+            
+            # Check for specific models we use
+            model_ids = [model['modelId'] for model in models['modelSummaries']]
+            required_models = ['amazon.nova-pro-v1:0']
+            
+            available_models = [model for model in required_models if model in model_ids]
+            
+            if not available_models:
+                self.verification_results['checks']['bedrock'] = {
+                    'status': 'FAILED',
+                    'message': 'Required Bedrock models not available',
+                    'required_models': required_models,
+                    'available_models': available_models
+                }
+                return False
+            
+            self.verification_results['checks']['bedrock'] = {
+                'status': 'PASSED',
+                'available_models': available_models
+            }
+            return True
+            
+        except Exception as e:
+            self.verification_results['checks']['bedrock'] = {
+                'status': 'ERROR',
+                'error': str(e)
+            }
+            return False
+
+    def run_all_verifications(self) -> bool:
+        """Run all verification checks."""
+        print(f"🔍 Starting deployment verification for region: {self.region}")
+        print(f"📋 Stack prefix: {self.stack_prefix}")
+        print("-" * 60)
+        
+        checks = [
+            ("CloudFormation Stacks", self.verify_cloudformation_stacks),
+            ("DynamoDB Tables", self.verify_dynamodb_tables),
+            ("Lambda Functions", self.verify_lambda_functions),
+            ("API Gateway", self.verify_api_gateway),
+            ("Cognito User Pool", self.verify_cognito_user_pool),
+            ("Bedrock Access", self.verify_bedrock_access),
+        ]
+        
+        all_passed = True
+        
+        for check_name, check_function in checks:
+            print(f"Checking {check_name}...", end=" ")
+            try:
+                result = check_function()
+                if result:
+                    print("✅ PASSED")
+                else:
+                    print("❌ FAILED")
+                    all_passed = False
+            except Exception as e:
+                print(f"💥 ERROR: {str(e)}")
+                all_passed = False
+        
+        print("-" * 60)
+        
+        if all_passed:
+            print("🎉 All verification checks passed!")
+            self.verification_results['overall_status'] = 'PASSED'
+        else:
+            print("❌ Some verification checks failed. Please review the issues above.")
+            self.verification_results['overall_status'] = 'FAILED'
+        
+        return all_passed
+
+    def save_report(self, output_file: str):
+        """Save verification report to file."""
+        with open(output_file, 'w') as f:
+            json.dump(self.verification_results, f, indent=2)
+        print(f"📄 Verification report saved to: {output_file}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Verify AWS Meeting Scheduling Agent deployment")
+    parser.add_argument("--region", default="eu-west-1", help="AWS region")
+    parser.add_argument("--stack-prefix", default="MeetingScheduler", help="CloudFormation stack prefix")
+    parser.add_argument("--output", default="verification_report.json", help="Output file for verification report")
     
-    d""t"agenng schedulieeting  for the monverificatioyment hensive depl""Compre"er:
-    rifiVeDeploymentr
+    args = parser.parse_args()
+    
+    verifier = DeploymentVerifier(region=args.region, stack_prefix=args.stack_prefix)
+    
+    success = verifier.run_all_verifications()
+    
+    verifier.save_report(args.output)
+    
+    if success:
+        print("\n✅ DEPLOYMENT VERIFICATION PASSED")
+        return 0
+    else:
+        print("\n❌ DEPLOYMENT VERIFICATION FAILED")
+        print("Please review the issues above and redeploy as needed.")
+        return 1
 
-class sErroaloCredenti, NorrrtElien import Cptionsocore.excee
-from bot Any, Tuplst,LiDict, mport yping i telta
-fromme, timedt datetie imporom datetimparse
-frargort sys
-import imprt time
 
-imponso
-import jquestsrt re3
-impoort boto"
-
-imp"onality.
-"stem functind sys, aintPI endpources, A AWS resoking all
-checm,d systethe deployecation of firi vensiveprehecom performs his scriptent
-
-Tng AgScheduliAWS Meeting r  Script fotionificayment Verlomated Dep
-Auto
-"""nv python3r/bin/e#!/us
+if __name__ == "__main__":
+    sys.exit(main())

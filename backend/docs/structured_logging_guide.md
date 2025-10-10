@@ -224,7 +224,7 @@ print(f"Average cost: ${metrics.average_cost_per_decision_usd:.4f}")
 ```python
 # Get aggregated metrics from S3
 historical_metrics = aggregator.get_aggregated_metrics(
-    bucket='meeting-agent-logs-archive-123456789012-us-east-1',
+    bucket='meeting-agent-logs-archive-123456789012-eu-west-1',
     period=AggregationPeriod.DAILY,
     start_date=datetime(2024, 1, 1),
     end_date=datetime(2024, 1, 31)
