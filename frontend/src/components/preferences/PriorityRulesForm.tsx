@@ -237,8 +237,9 @@ export function PriorityRulesForm({ priorityRules, onUpdate }: PriorityRulesForm
       </div>
     </div>
   )
-}inter
-face PriorityRuleFormProps {
+}
+
+interface PriorityRuleFormProps {
   rule: Partial<PriorityRule>
   onChange: (updates: Partial<PriorityRule>) => void
   errors: Record<string, string>

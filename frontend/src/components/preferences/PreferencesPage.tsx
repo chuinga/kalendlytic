@@ -7,7 +7,7 @@ import { MeetingTypesForm } from './MeetingTypesForm'
 import { FocusBlocksForm } from './FocusBlocksForm'
 import { PriorityRulesForm } from './PriorityRulesForm'
 import { GeneralSettingsForm } from './GeneralSettingsForm'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export function PreferencesPage() {
   const {

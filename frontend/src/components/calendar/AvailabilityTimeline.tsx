@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Calendar, Clock, AlertTriangle, Users, ChevronLeft, ChevronRight } from 'lucide-react'
 import { AvailabilityData, CalendarEvent, TimeSlot, CalendarViewMode } from '@/types/calendar'
+import { CalendarService } from '@/utils/calendar'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface AvailabilityTimelineProps {
@@ -33,19 +34,11 @@ export function AvailabilityTimeline({
       const startDate = getStartDate(viewMode)
       const endDate = getEndDate(viewMode)
       
-      // Fetch availability data
-      const availabilityResponse = await fetch(`/api/calendar/availability?start=${startDate}&end=${endDate}`)
-      if (!availabilityResponse.ok) {
-        throw new Error('Failed to fetch availability data')
-      }
-      const availability = await availabilityResponse.json()
-      
-      // Fetch calendar events
-      const eventsResponse = await fetch(`/api/calendar/events?start=${startDate}&end=${endDate}`)
-      if (!eventsResponse.ok) {
-        throw new Error('Failed to fetch calendar events')
-      }
-      const eventsData = await eventsResponse.json()
+      // Fetch availability data and calendar events
+      const [availability, eventsData] = await Promise.all([
+        CalendarService.getAvailability(startDate, endDate),
+        CalendarService.getEvents(startDate, endDate)
+      ])
       
       setAvailabilityData(availability)
       setEvents(eventsData)

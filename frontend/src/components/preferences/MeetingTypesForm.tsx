@@ -240,8 +240,8 @@ export function MeetingTypesForm({ meetingTypes, defaultMeetingDuration, onUpdat
     </div>
   )
 }
-in
-terface MeetingTypeFormProps {
+
+interface MeetingTypeFormProps {
   meetingType: Partial<MeetingType>
   onChange: (updates: Partial<MeetingType>) => void
   errors: Record<string, string>

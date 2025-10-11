@@ -235,8 +235,9 @@ export function FocusBlocksForm({ focusBlocks, onUpdate }: FocusBlocksFormProps)
       </div>
     </div>
   )
-}inter
-face FocusBlockFormProps {
+}
+
+interface FocusBlockFormProps {
   focusBlock: Partial<FocusBlock>
   onChange: (updates: Partial<FocusBlock>) => void
   errors: Record<string, string>

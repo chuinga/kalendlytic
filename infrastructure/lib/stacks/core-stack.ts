@@ -4,6 +4,8 @@ import * as kms from 'aws-cdk-lib/aws-kms';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as path from 'path';
 import { Construct } from 'constructs';
 
 export interface CoreStackProps extends cdk.StackProps {
@@ -25,6 +27,7 @@ export class CoreStack extends cdk.Stack {
   public auditLogsTable: dynamodb.Table;
   public googleOAuthSecret: secretsmanager.Secret;
   public microsoftOAuthSecret: secretsmanager.Secret;
+  public cognitoTriggersFunction: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: CoreStackProps) {
     super(scope, id, props);
@@ -34,6 +37,9 @@ export class CoreStack extends cdk.Stack {
     
     // Create DynamoDB tables
     this.createDynamoDBTables();
+    
+    // Create Lambda functions for Cognito triggers
+    this.createCognitoTriggerFunction();
     
     // Create Cognito User Pool and Identity Pool
     this.createCognitoResources();
@@ -218,6 +224,39 @@ export class CoreStack extends cdk.Stack {
     });
   }
 
+  private createCognitoTriggerFunction(): void {
+    // Create Lambda function for Cognito triggers
+    this.cognitoTriggersFunction = new lambda.Function(this, 'CognitoTriggersFunction', {
+      functionName: 'meeting-agent-cognito-triggers',
+      runtime: lambda.Runtime.PYTHON_3_11,
+      handler: 'cognito_triggers.lambda_handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../../backend/src/lambda_functions')),
+      timeout: cdk.Duration.seconds(30),
+      memorySize: 256,
+      environment: {
+        USERS_TABLE_NAME: this.usersTable.tableName,
+        PREFERENCES_TABLE_NAME: this.preferencesTable.tableName,
+        LOG_LEVEL: 'INFO'
+      },
+      description: 'Handles Cognito user lifecycle events and creates user profiles'
+    });
+
+    // Grant permissions to write to DynamoDB tables
+    this.usersTable.grantWriteData(this.cognitoTriggersFunction);
+    this.preferencesTable.grantWriteData(this.cognitoTriggersFunction);
+
+    // Grant permissions for CloudWatch logging
+    this.cognitoTriggersFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'logs:CreateLogGroup',
+        'logs:CreateLogStream',
+        'logs:PutLogEvents'
+      ],
+      resources: [`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/meeting-agent-cognito-triggers:*`]
+    }));
+  }
+
   private createCognitoResources(): void {
     // Create Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'UserPool', {
@@ -242,10 +281,13 @@ export class CoreStack extends cdk.Stack {
           required: false,
           mutable: true,
         },
-        timezone: {
-          required: false,
+      },
+      customAttributes: {
+        timezone: new cognito.StringAttribute({
+          minLen: 1,
+          maxLen: 50,
           mutable: true,
-        },
+        }),
       },
       passwordPolicy: {
         minLength: 8,
@@ -256,6 +298,10 @@ export class CoreStack extends cdk.Stack {
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
+      lambdaTriggers: {
+        postConfirmation: this.cognitoTriggersFunction,
+        preSignUp: this.cognitoTriggersFunction,
+      },
     });
 
     // Create User Pool Client
@@ -449,6 +495,13 @@ export class CoreStack extends cdk.Stack {
       value: this.microsoftOAuthSecret.secretArn,
       description: 'Microsoft OAuth secret ARN',
       exportName: 'meeting-agent-microsoft-oauth-secret',
+    });
+
+    // Lambda function outputs
+    new cdk.CfnOutput(this, 'CognitoTriggersFunctionArn', {
+      value: this.cognitoTriggersFunction.functionArn,
+      description: 'Cognito triggers Lambda function ARN',
+      exportName: 'meeting-agent-cognito-triggers-function',
     });
   }
 }

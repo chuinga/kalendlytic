@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Bot, CheckCircle, XCircle, Clock, AlertTriangle, Eye, ThumbsUp, ThumbsDown, RefreshCw } from 'lucide-react'
 import { AgentAction } from '@/types/calendar'
+import { AgentService } from '@/utils/calendar'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface AgentActionReviewProps {
@@ -28,12 +29,8 @@ export function AgentActionReview({
   const fetchActions = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/agent/actions')
-      if (!response.ok) {
-        throw new Error('Failed to fetch agent actions')
-      }
-      const data = await response.json()
-      setActions(data)
+      const actions = await AgentService.getActions()
+      setActions(actions)
     } catch (error) {
       console.error('Failed to fetch actions:', error)
     } finally {
