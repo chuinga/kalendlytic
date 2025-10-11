@@ -137,7 +137,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <ConnectionStatus />
               <span className="text-sm text-gray-700">
-                Welcome, {user?.email || user?.attributes?.email}
+                Welcome, {user?.attributes?.name || user?.email || user?.attributes?.email}
               </span>
               <button
                 onClick={() => router.push('/profile')}
