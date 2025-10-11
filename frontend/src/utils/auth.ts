@@ -1,4 +1,4 @@
-import { getCurrentUser, signIn, signUp, signOut, fetchAuthSession, updateUserAttributes } from 'aws-amplify/auth'
+import { getCurrentUser, signIn, signUp, signOut, fetchAuthSession, updateUserAttributes, fetchUserAttributes } from 'aws-amplify/auth'
 import { User, LoginCredentials, RegisterCredentials, UserProfile } from '@/types/auth'
 
 export class AuthService {
@@ -8,10 +8,13 @@ export class AuthService {
   static async getCurrentUser(): Promise<User | null> {
     try {
       const user = await getCurrentUser()
+      const attributes = await fetchUserAttributes()
+      console.log('Raw user object:', user) // Debug log
+      console.log('User attributes:', attributes) // Debug log
       return {
         id: user.userId,
-        email: user.signInDetails?.loginId || '',
-        attributes: (user as any).attributes || {}
+        email: user.signInDetails?.loginId || attributes.email || '',
+        attributes: attributes || {}
       }
     } catch (error) {
       console.error('Error getting current user:', error)

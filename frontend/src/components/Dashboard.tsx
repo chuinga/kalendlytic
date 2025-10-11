@@ -137,7 +137,12 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <ConnectionStatus />
               <span className="text-sm text-gray-700">
-                Welcome, {user?.attributes?.name || user?.email || user?.attributes?.email}
+                Welcome, {(() => {
+                  console.log('User object in Dashboard:', user);
+                  console.log('User attributes:', user?.attributes);
+                  console.log('User name:', user?.attributes?.name);
+                  return user?.attributes?.name || user?.email || user?.attributes?.email;
+                })()}
               </span>
               <button
                 onClick={() => router.push('/profile')}

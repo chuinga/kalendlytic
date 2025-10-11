@@ -166,7 +166,12 @@
 
 - [x] 8. Build React frontend with authentication and calendar views
 
-- [x] 8.1 Create authentication and user management
+- [ ] 8.1 Create authentication and user management
+
+
+
+
+
 
 
 
