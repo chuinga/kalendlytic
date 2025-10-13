@@ -18,7 +18,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-white/90 mb-2 drop-shadow-sm"
+            className="block text-sm font-outfit font-semibold text-white/90 mb-3 tracking-wide"
           >
             {label}
           </label>
@@ -26,7 +26,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         
         <div className="relative group">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 group-focus-within:text-white/90 transition-colors duration-200">
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60 group-focus-within:text-cyan-400 transition-all duration-200">
               {leftIcon}
             </div>
           )}
@@ -34,17 +34,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             id={inputId}
             className={cn(
-              `w-full px-4 py-3 rounded-xl
-               border border-white/20 
-               focus:border-white/40 focus:ring-4 focus:ring-white/10
-               bg-white/10 backdrop-blur-md placeholder-white/50
-               text-white font-medium
-               transition-all duration-200 ease-out
-               disabled:opacity-50 disabled:cursor-not-allowed
-               disabled:bg-white/5`,
-              leftIcon && 'pl-10',
-              rightIcon && 'pr-10',
-              error && 'border-red-400/50 focus:border-red-400/70 focus:ring-red-400/20',
+              'input-premium',
+              leftIcon && 'pl-12',
+              rightIcon && 'pr-12',
+              error && 'border-red-400/50 focus:border-red-400/70 focus:ring-red-400/20 focus:shadow-red-500/20',
               className
             )}
             ref={ref}
@@ -52,7 +45,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
           
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 group-focus-within:text-white/90 transition-colors duration-200">
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 group-focus-within:text-cyan-400 transition-all duration-200">
               {rightIcon}
             </div>
           )}
@@ -60,10 +53,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         
         {(error || helperText) && (
           <p className={cn(
-            'mt-2 text-sm',
-            error ? 'text-red-300' : 'text-white/60'
+            'mt-3 text-sm font-medium',
+            error ? 'text-red-300 flex items-center space-x-2' : 'text-white/60'
           )}>
-            {error || helperText}
+            {error && <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>}
+            <span>{error || helperText}</span>
           </p>
         )}
       </div>

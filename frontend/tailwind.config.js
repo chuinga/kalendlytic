@@ -8,65 +8,59 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary - Sophisticated Purple-Blue Gradient
-        primary: {
-          50: '#f0f4ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+        // Design System Colors from uxui-design.md
+        background: {
+          light: '#F8FAFC',
+          dark: '#0B0E14',
         },
-        // Secondary - Warm Coral Accent
+        glass: {
+          light: 'rgba(255, 255, 255, 0.15)',
+          dark: 'rgba(15, 15, 15, 0.25)',
+        },
         accent: {
-          50: '#fef7f0',
-          100: '#feecdc',
-          200: '#fcd9bd',
-          300: '#fdba8c',
-          400: '#ff8a4c',
-          500: '#ff5722',
-          600: '#ea580c',
-          700: '#c2410c',
-          800: '#9a3412',
-          900: '#7c2d12',
+          DEFAULT: '#22D3EE', // Cyan neon
+          hover: '#0891B2',
         },
-        // Neutrals - Sophisticated Grays
-        neutral: {
-          0: '#ffffff',
-          50: '#fafbfc',
-          100: '#f4f6f8',
-          200: '#e4e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+        text: {
+          primary: {
+            light: '#0F172A',
+            dark: '#F8FAFC',
+          },
+          secondary: {
+            light: '#64748B',
+            dark: '#94A3B8',
+          },
         },
-        // Semantic Colors
-        success: '#10b981',
-        warning: '#f59e0b',
-        error: '#ef4444',
-        info: '#3b82f6',
+        success: '#22C55E',
+        warning: '#F59E0B',
+        error: {
+          light: '#E11D48',
+          dark: '#F87171',
+        },
+        border: {
+          light: 'rgba(255, 255, 255, 0.1)',
+          dark: 'rgba(255, 255, 255, 0.2)',
+        },
+        // Gradient colors
+        gradient: {
+          from: '#1E3A8A',
+          to: '#9333EA',
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        outfit: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'monospace'],
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+        'sm': ['0.8125rem', { lineHeight: '1.125rem' }], // 13px Caption
+        'base': ['1rem', { lineHeight: '1.5rem' }], // 16px Body
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }], // 18px H3
         'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px H2
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '4xl': ['2rem', { lineHeight: '2.5rem' }], // 32px H1
         '5xl': ['3rem', { lineHeight: '1' }],
       },
       spacing: {
@@ -175,6 +169,8 @@ module.exports = {
       },
       backdropBlur: {
         'xs': '2px',
+        'glass': '16px',
+        'glass-strong': '24px',
       },
       transitionTimingFunction: {
         'spring': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
