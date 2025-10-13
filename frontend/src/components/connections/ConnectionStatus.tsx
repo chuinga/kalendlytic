@@ -16,12 +16,44 @@ export function ConnectionStatus({
   variant = 'compact',
   className = '' 
 }: ConnectionStatusProps) {
-  const { connections, loading } = useConnections()
+  const { connections, loading, error } = useConnections()
 
   if (loading) {
     return (
       <div className={cn('animate-pulse', className)}>
-        <div className="h-6 bg-neutral-200 rounded-lg w-32"></div>
+        <div className="h-6 bg-gray-200 rounded-lg w-32"></div>
+      </div>
+    )
+  }
+
+  // Handle API errors gracefully
+  if (error || connections.length === 0) {
+    if (variant === 'compact') {
+      return (
+        <div className={cn('flex items-center space-x-2', className)}>
+          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+          <span className="text-sm font-medium text-gray-700">
+            API Offline
+          </span>
+        </div>
+      )
+    }
+    
+    return (
+      <div className={cn('bg-yellow-50 rounded-lg p-3 border border-yellow-200', className)}>
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-yellow-100 text-yellow-600">
+            <WifiOff className="w-4 h-4" />
+          </div>
+          <div className="flex-1">
+            <span className="text-sm font-medium text-yellow-800">
+              Backend API Offline
+            </span>
+            <p className="text-xs text-yellow-600 mt-1">
+              Calendar connections unavailable
+            </p>
+          </div>
+        </div>
       </div>
     )
   }

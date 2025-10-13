@@ -3,6 +3,7 @@ import { Calendar, Clock, AlertTriangle, Users, ChevronLeft, ChevronRight } from
 import { AvailabilityData, CalendarEvent, TimeSlot, CalendarViewMode } from '@/types/calendar'
 import { CalendarService } from '@/utils/calendar'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import OfflineIndicator from '@/components/ui/OfflineIndicator'
 
 interface AvailabilityTimelineProps {
   viewMode: CalendarViewMode
@@ -265,6 +266,16 @@ export function AvailabilityTimeline({
   }
 
   if (error) {
+    // Check if it's a network error (API offline)
+    if (error.includes('Network Error') || error.includes('ERR_NAME_NOT_RESOLVED') || error.includes('Failed to fetch')) {
+      return (
+        <OfflineIndicator
+          title="Calendar Data Unavailable"
+          message="Unable to connect to the backend API. Calendar features will be available once the backend is deployed."
+        />
+      )
+    }
+
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <div className="flex items-center space-x-2">
