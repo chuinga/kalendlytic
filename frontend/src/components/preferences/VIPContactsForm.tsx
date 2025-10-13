@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Edit2, Save, X, AlertCircle, Star, Crown, Zap } from 'lucide-react'
+import { Plus, Trash2, Edit2, Save, X, AlertCircle, Star, Crown, Zap, Users } from 'lucide-react'
 import { VIPContact } from '@/types/preferences'
 import { PreferencesService } from '@/utils/preferences'
 

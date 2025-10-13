@@ -2,10 +2,11 @@
  * Audit trail page with dashboard and detailed trail view.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthService } from '../utils/auth';
 import { AuditDashboard } from '../components/audit/AuditDashboard';
 import { AuditTrail } from '../components/audit/AuditTrail';
 
@@ -16,10 +17,27 @@ interface AuditPageProps {
 }
 
 const AuditPage: React.FC<AuditPageProps> = ({ initialTab = 'dashboard' }) => {
-  const { user, token } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+  const [token, setToken] = useState<string | null>(null);
 
-  if (!user || !token) {
+  useEffect(() => {
+    const getToken = async () => {
+      if (isAuthenticated) {
+        try {
+          const tokens = await AuthService.getTokens();
+          if (tokens) {
+            setToken(tokens.accessToken);
+          }
+        } catch (error) {
+          console.error('Failed to get token:', error);
+        }
+      }
+    };
+    getToken();
+  }, [isAuthenticated]);
+
+  if (!user || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -81,13 +99,13 @@ const AuditPage: React.FC<AuditPageProps> = ({ initialTab = 'dashboard' }) => {
           {/* Tab Content */}
           <div className="tab-content">
             {activeTab === 'dashboard' && (
-              <AuditDashboard token={token} />
+              <AuditDashboard token={token || ''} />
             )}
             
             {activeTab === 'trail' && (
               <AuditTrail 
-                userId={user.user_id}
-                token={token}
+                userId={user.id}
+                token={token || ''}
               />
             )}
           </div>

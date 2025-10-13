@@ -46,13 +46,15 @@ export function FocusBlocksForm({ focusBlocks, onUpdate }: FocusBlocksFormProps)
 
     // Check for overlapping focus blocks on the same day
     if (focusBlock.day && focusBlock.start && focusBlock.end) {
+      const start = focusBlock.start
+      const end = focusBlock.end
       const overlapping = focusBlocks.find(fb => 
         fb.id !== focusBlock.id &&
         fb.day === focusBlock.day &&
         (
-          (focusBlock.start >= fb.start && focusBlock.start < fb.end) ||
-          (focusBlock.end > fb.start && focusBlock.end <= fb.end) ||
-          (focusBlock.start <= fb.start && focusBlock.end >= fb.end)
+          (start >= fb.start && start < fb.end) ||
+          (end > fb.start && end <= fb.end) ||
+          (start <= fb.start && end >= fb.end)
         )
       )
       
@@ -196,7 +198,7 @@ export function FocusBlocksForm({ focusBlocks, onUpdate }: FocusBlocksFormProps)
                           onChange={() => {}} // Not used in edit mode
                           errors={errors}
                           dayOptions={dayOptions}
-                          onSave={(updates) => handleUpdateFocusBlock(focusBlock.id, updates)}
+                          onSave={(updates) => updates && handleUpdateFocusBlock(focusBlock.id, updates)}
                           onCancel={() => {
                             setEditingId(null)
                             setErrors({})

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Edit2, Save, X, AlertCircle, Clock, Video, MapPin } from 'lucide-react'
+import { Plus, Trash2, Edit2, Save, X, AlertCircle, Clock, Video, MapPin, Calendar } from 'lucide-react'
 import { MeetingType } from '@/types/preferences'
 import { PreferencesService } from '@/utils/preferences'
 
@@ -203,7 +203,7 @@ export function MeetingTypesForm({ meetingTypes, defaultMeetingDuration, onUpdat
                   errors={errors}
                   priorityOptions={priorityOptions}
                   durationOptions={durationOptions}
-                  onSave={(updates) => handleUpdateMeetingType(meetingType.id, updates)}
+                  onSave={(updates) => updates && handleUpdateMeetingType(meetingType.id, updates)}
                   onCancel={() => {
                     setEditingId(null)
                     setErrors({})

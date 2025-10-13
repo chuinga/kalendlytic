@@ -107,3 +107,14 @@ export interface AvailabilityQuery {
   minDuration?: number // minutes
   workingHoursOnly?: boolean
 }
+
+export interface ConflictData {
+  id: string
+  title: string
+  conflictingEvents: CalendarEvent[]
+  suggestedResolutions: {
+    id: string
+    description: string
+    newTime: string
+  }[]
+}

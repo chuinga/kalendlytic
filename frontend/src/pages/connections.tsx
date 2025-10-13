@@ -4,9 +4,9 @@ import { ConnectionsPage } from '@/components/connections/ConnectionsPage'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 export default function Connections() {
-  const { loading } = useAuthGuard()
+  const { isLoading } = useAuthGuard()
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>

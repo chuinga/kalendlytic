@@ -11,10 +11,20 @@ export class AuthService {
       const attributes = await fetchUserAttributes()
       console.log('Raw user object:', user) // Debug log
       console.log('User attributes:', attributes) // Debug log
+      const userEmail = user.signInDetails?.loginId || attributes.email || ''
+      const emailVerified = attributes.email_verified === 'true' || (attributes.email_verified as any) === true
+      
       return {
         id: user.userId,
-        email: user.signInDetails?.loginId || attributes.email || '',
-        attributes: attributes || {}
+        email: userEmail,
+        attributes: {
+          email: userEmail,
+          email_verified: emailVerified,
+          name: attributes.name,
+          ...Object.fromEntries(
+            Object.entries(attributes).filter(([key]) => !['email', 'email_verified', 'name'].includes(key))
+          )
+        }
       }
     } catch (error) {
       console.error('Error getting current user:', error)

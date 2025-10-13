@@ -198,7 +198,7 @@ export function PriorityRulesForm({ priorityRules, onUpdate }: PriorityRulesForm
                   conditionTypes={conditionTypes}
                   operators={operators}
                   priorityOptions={priorityOptions}
-                  onSave={(updates) => handleUpdateRule(rule.id, updates)}
+                  onSave={(updates) => updates && handleUpdateRule(rule.id, updates)}
                   onCancel={() => {
                     setEditingId(null)
                     setErrors({})
@@ -284,7 +284,10 @@ function PriorityRuleForm({
 
   const updateCondition = (conditionUpdates: Partial<PriorityRule['condition']>) => {
     const newCondition = { ...formData.condition, ...conditionUpdates }
-    updateFormData({ condition: newCondition })
+    // Only update if all required fields are present
+    if (newCondition.type && newCondition.operator && newCondition.value !== undefined) {
+      updateFormData({ condition: newCondition as PriorityRule['condition'] })
+    }
   }
 
   const getPlaceholderText = (type: string) => {

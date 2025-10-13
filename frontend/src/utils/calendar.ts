@@ -1,54 +1,19 @@
 import { apiClient } from './api'
+import { 
+  AvailabilityData, 
+  CalendarEvent, 
+  AgentAction as AgentActionType,
+  MeetingRequest as MeetingRequestType,
+  ConflictData as ConflictDataType
+} from '@/types/calendar'
 
-export interface AvailabilityData {
-  date: string
-  slots: {
-    start: string
-    end: string
-    available: boolean
-    conflicts?: string[]
-  }[]
-}
+// Re-export types for convenience
+export type { AvailabilityData, CalendarEvent }
 
-export interface CalendarEvent {
-  id: string
-  title: string
-  start: string
-  end: string
-  attendees: string[]
-  location?: string
-  description?: string
-  provider: 'google' | 'microsoft'
-}
-
-export interface MeetingRequest {
-  title: string
-  attendees: string[]
-  duration: number
-  preferredTimes: string[]
-  description?: string
-  location?: string
-}
-
-export interface ConflictData {
-  id: string
-  title: string
-  conflictingEvents: CalendarEvent[]
-  suggestedResolutions: {
-    id: string
-    description: string
-    newTime: string
-  }[]
-}
-
-export interface AgentAction {
-  id: string
-  type: 'schedule' | 'reschedule' | 'cancel'
-  description: string
-  status: 'pending' | 'approved' | 'rejected'
-  createdAt: string
-  details: any
-}
+// Use types from the types file
+export type MeetingRequest = MeetingRequestType
+export type ConflictData = ConflictDataType  
+export type AgentAction = AgentActionType
 
 export class CalendarService {
   /**
