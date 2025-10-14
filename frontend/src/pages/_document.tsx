@@ -14,6 +14,7 @@ export default function Document() {
         
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         
         {/* Meta tags */}
         <meta name="theme-color" content="#6366f1" />

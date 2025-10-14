@@ -147,9 +147,7 @@ export default function Dashboard() {
               
               {/* Logo */}
               <div className="flex items-center space-x-3 ml-2 md:ml-0">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-white" />
-                </div>
+                <img src="/logo.png" alt="Kalendlytic" className="w-8 h-8" />
                 <div className="hidden sm:block">
                   <h1 className="text-xl font-bold text-gray-900">Kalendlytic</h1>
                 </div>
