@@ -2,9 +2,9 @@
   "environment": "dev",
   "region": "eu-west-1",
   "account": "${CDK_DEFAULT_ACCOUNT}",
-  "stackPrefix": "meeting-scheduling-agent-dev",
+  "stackPrefix": "kalendlytic-dev",
   "tags": {
-    "Project": "meeting-scheduling-agent",
+    "Project": "kalendlytic",
     "Environment": "dev",
     "ManagedBy": "CDK",
     "CostCenter": "development",
@@ -54,7 +54,7 @@
         "burstLimit": 200
       },
       "cors": {
-        "allowOrigins": ["http://localhost:3000", "https://dev.meeting-scheduler.example.com"],
+        "allowOrigins": ["http://localhost:3000", "https://dev.kalendlytic.com"],
         "allowMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allowHeaders": ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key"]
       }
@@ -76,7 +76,7 @@
       "compressionEnabled": true,
       "customDomain": {
         "enabled": false,
-        "domainName": "dev.meeting-scheduler.example.com",
+        "domainName": "dev.kalendlytic.com",
         "certificateArn": ""
       }
     }

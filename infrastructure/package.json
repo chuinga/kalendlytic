@@ -1,7 +1,7 @@
 {
-  "name": "aws-meeting-scheduling-agent-infrastructure",
+  "name": "kalendlytic-infrastructure",
   "version": "1.0.0",
-  "description": "AWS CDK infrastructure for Meeting Scheduling Agent",
+  "description": "AWS CDK infrastructure for Kalendlytic",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",
@@ -48,10 +48,11 @@
   "keywords": [
     "aws",
     "cdk",
+    "kalendlytic",
     "meeting-scheduling",
     "bedrock",
     "agentcore"
   ],
-  "author": "AWS Meeting Scheduling Agent Team",
+  "author": "Kalendlytic Team",
   "license": "MIT"
 }

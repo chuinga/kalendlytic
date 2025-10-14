@@ -34,7 +34,7 @@ export class WebStack extends cdk.Stack {
   private createS3Bucket(): void {
     // Create S3 bucket for static website hosting
     this.websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
-      bucketName: `meeting-agent-website-${this.account}-${this.region}`,
+      bucketName: `kalendlytic-website-${this.account}-${this.region}`,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
       autoDeleteObjects: true, // For dev environment
       versioned: false,
@@ -46,7 +46,7 @@ export class WebStack extends cdk.Stack {
 
     // Create Origin Access Identity for CloudFront
     this.originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OriginAccessIdentity', {
-      comment: 'OAI for Meeting Scheduling Agent website',
+      comment: 'OAI for Kalendlytic website',
     });
 
     // Grant CloudFront OAI read access to the S3 bucket
@@ -63,7 +63,7 @@ export class WebStack extends cdk.Stack {
   private createCloudFrontDistribution(apiStack: ApiStack): void {
     // Create CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
-      comment: 'Meeting Scheduling Agent website distribution',
+      comment: 'Kalendlytic website distribution',
       defaultRootObject: 'index.html',
       errorResponses: [
         {
@@ -119,7 +119,7 @@ export class WebStack extends cdk.Stack {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS Meeting Scheduling Agent</title>
+    <title>Kalendlytic - AI Meeting Scheduler</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -161,8 +161,8 @@ export class WebStack extends cdk.Stack {
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Meeting Scheduling Agent</h1>
-        <p>AI-powered meeting management across Gmail and Outlook calendars</p>
+        <h1>📅 Kalendlytic</h1>
+        <p>AI-powered meeting scheduling across Gmail and Outlook calendars</p>
         <div class="status">
             <h3>Infrastructure Deployed Successfully! ✅</h3>
             <p>The AWS infrastructure is ready. Frontend application will be deployed in the next phase.</p>
@@ -186,25 +186,25 @@ export class WebStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'WebsiteBucketName', {
       value: this.websiteBucket.bucketName,
       description: 'S3 bucket name for website hosting',
-      exportName: 'meeting-agent-website-bucket',
+      exportName: 'kalendlytic-website-bucket',
     });
 
     new cdk.CfnOutput(this, 'DistributionId', {
       value: this.distribution.distributionId,
       description: 'CloudFront distribution ID',
-      exportName: 'meeting-agent-distribution-id',
+      exportName: 'kalendlytic-distribution-id',
     });
 
     new cdk.CfnOutput(this, 'DistributionDomainName', {
       value: this.distribution.distributionDomainName,
       description: 'CloudFront distribution domain name',
-      exportName: 'meeting-agent-distribution-domain',
+      exportName: 'kalendlytic-distribution-domain',
     });
 
     new cdk.CfnOutput(this, 'WebsiteUrl', {
       value: `https://${this.distribution.distributionDomainName}`,
       description: 'Website URL',
-      exportName: 'meeting-agent-website-url',
+      exportName: 'kalendlytic-website-url',
     });
   }
 }

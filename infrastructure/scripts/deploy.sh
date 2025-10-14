@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# AWS Meeting Scheduling Agent - CDK Deployment Script
+# Kalendlytic - CDK Deployment Script
 # This script handles environment-specific deployments with proper error handling and rollback capabilities
 
 set -euo pipefail
@@ -8,7 +8,7 @@ set -euo pipefail
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-PROJECT_NAME="meeting-scheduling-agent"
+PROJECT_NAME="kalendlytic"
 
 # Default values
 ENVIRONMENT="dev"
@@ -49,7 +49,7 @@ usage() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Deploy AWS Meeting Scheduling Agent infrastructure using CDK
+Deploy Kalendlytic infrastructure using CDK
 
 OPTIONS:
     -e, --environment ENV    Environment to deploy (dev, staging, prod) [default: dev]
@@ -203,9 +203,9 @@ bootstrap_cdk() {
     
     # Bootstrap with specific tags and configuration
     cdk bootstrap aws://$AWS_ACCOUNT_ID/$REGION \
-        --context "meeting-scheduling-agent:environment=$ENVIRONMENT" \
-        --context "meeting-scheduling-agent:region=$REGION" \
-        --tags "Project=meeting-scheduling-agent" \
+        --context "kalendlytic:environment=$ENVIRONMENT" \
+        --context "kalendlytic:region=$REGION" \
+        --tags "Project=kalendlytic" \
         --tags "Environment=$ENVIRONMENT" \
         --cloudformation-execution-policies "arn:aws:iam::aws:policy/AdministratorAccess"
     
@@ -227,8 +227,8 @@ deploy_stacks() {
     cd "$PROJECT_ROOT"
     
     local cdk_args=(
-        "--context" "meeting-scheduling-agent:environment=$ENVIRONMENT"
-        "--context" "meeting-scheduling-agent:region=$REGION"
+        "--context" "kalendlytic:environment=$ENVIRONMENT"
+        "--context" "kalendlytic:region=$REGION"
         "--require-approval" "never"
     )
     
@@ -348,7 +348,7 @@ trap cleanup EXIT
 
 # Main execution
 main() {
-    log_info "Starting deployment for AWS Meeting Scheduling Agent"
+    log_info "Starting deployment for Kalendlytic"
     log_info "Environment: $ENVIRONMENT"
     log_info "Region: $REGION"
     

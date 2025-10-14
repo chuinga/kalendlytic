@@ -1,5 +1,5 @@
 """
-AWS service client utilities with proper configuration and error handling.
+Kalendlytic AWS service client utilities with proper configuration and error handling.
 """
 
 import boto3

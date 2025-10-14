@@ -9,8 +9,8 @@ import { MonitoringStack } from './stacks/monitoring-stack';
 const app = new cdk.App();
 
 // Get environment configuration from CDK context
-const region = app.node.tryGetContext('meeting-scheduling-agent:region') || 'eu-west-1';
-const environment = app.node.tryGetContext('meeting-scheduling-agent:environment') || 'dev';
+const region = app.node.tryGetContext('kalendlytic:region') || 'eu-west-1';
+const environment = app.node.tryGetContext('kalendlytic:environment') || 'dev';
 const account = process.env.CDK_DEFAULT_ACCOUNT;
 
 const env = {
@@ -19,14 +19,14 @@ const env = {
 };
 
 // Stack naming convention: {project}-{environment}-{stack-name}
-const stackPrefix = `meeting-scheduling-agent-${environment}`;
+const stackPrefix = `kalendlytic-${environment}`;
 
 // Core infrastructure stack (DynamoDB, Cognito, KMS, Secrets Manager)
 const coreStack = new CoreStack(app, `${stackPrefix}-core`, {
   env,
-  description: 'Core infrastructure for AWS Meeting Scheduling Agent',
+  description: 'Core infrastructure for Kalendlytic - AI meeting scheduler',
   tags: {
-    Project: 'meeting-scheduling-agent',
+    Project: 'kalendlytic',
     Environment: environment,
     Stack: 'core'
   }
@@ -35,10 +35,10 @@ const coreStack = new CoreStack(app, `${stackPrefix}-core`, {
 // API infrastructure stack (API Gateway, Lambda functions, EventBridge)
 const apiStack = new ApiStack(app, `${stackPrefix}-api`, {
   env,
-  description: 'API infrastructure for AWS Meeting Scheduling Agent',
+  description: 'API infrastructure for Kalendlytic - AI meeting scheduler',
   coreStack,
   tags: {
-    Project: 'meeting-scheduling-agent',
+    Project: 'kalendlytic',
     Environment: environment,
     Stack: 'api'
   }
@@ -47,10 +47,10 @@ const apiStack = new ApiStack(app, `${stackPrefix}-api`, {
 // Web infrastructure stack (S3, CloudFront)
 const webStack = new WebStack(app, `${stackPrefix}-web`, {
   env,
-  description: 'Web infrastructure for AWS Meeting Scheduling Agent',
+  description: 'Web infrastructure for Kalendlytic - AI meeting scheduler',
   apiStack,
   tags: {
-    Project: 'meeting-scheduling-agent',
+    Project: 'kalendlytic',
     Environment: environment,
     Stack: 'web'
   }
@@ -59,12 +59,12 @@ const webStack = new WebStack(app, `${stackPrefix}-web`, {
 // Monitoring infrastructure stack (CloudWatch, Alarms, Dashboards)
 const monitoringStack = new MonitoringStack(app, `${stackPrefix}-monitoring`, {
   env,
-  description: 'Monitoring infrastructure for AWS Meeting Scheduling Agent',
+  description: 'Monitoring infrastructure for Kalendlytic - AI meeting scheduler',
   coreStack,
   apiStack,
   webStack,
   tags: {
-    Project: 'meeting-scheduling-agent',
+    Project: 'kalendlytic',
     Environment: environment,
     Stack: 'monitoring'
   }

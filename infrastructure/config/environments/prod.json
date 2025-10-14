@@ -2,9 +2,9 @@
   "environment": "prod",
   "region": "eu-west-1",
   "account": "${CDK_DEFAULT_ACCOUNT}",
-  "stackPrefix": "meeting-scheduling-agent-prod",
+  "stackPrefix": "kalendlytic-prod",
   "tags": {
-    "Project": "meeting-scheduling-agent",
+    "Project": "kalendlytic",
     "Environment": "prod",
     "ManagedBy": "CDK",
     "CostCenter": "production",
@@ -72,7 +72,7 @@
         "burstLimit": 5000
       },
       "cors": {
-        "allowOrigins": ["https://meeting-scheduler.example.com"],
+        "allowOrigins": ["https://kalendlytic.com"],
         "allowMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allowHeaders": ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key"]
       },
@@ -94,7 +94,7 @@
       "blockPublicAccess": true,
       "crossRegionReplication": {
         "enabled": true,
-        "destinationBucket": "meeting-scheduler-backup-eu-central-1"
+        "destinationBucket": "kalendlytic-backup-eu-central-1"
       }
     },
     "cloudFront": {
@@ -103,7 +103,7 @@
       "compressionEnabled": true,
       "customDomain": {
         "enabled": true,
-        "domainName": "meeting-scheduler.example.com",
+        "domainName": "kalendlytic.com",
         "certificateArn": "arn:aws:acm:eu-west-1:ACCOUNT:certificate/CERT-ID"
       },
       "waf": {

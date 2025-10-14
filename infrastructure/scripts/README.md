@@ -1,6 +1,6 @@
-# AWS Meeting Scheduling Agent - Deployment Scripts
+# Kalendlytic - Deployment Scripts
 
-This directory contains deployment automation scripts for the AWS Meeting Scheduling Agent infrastructure.
+This directory contains deployment automation scripts for the Kalendlytic infrastructure.
 
 ## Scripts Overview
 

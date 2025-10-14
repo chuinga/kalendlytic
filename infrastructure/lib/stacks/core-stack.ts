@@ -54,14 +54,14 @@ export class CoreStack extends cdk.Stack {
   private createKMSKeys(): void {
     // KMS key for general data encryption (DynamoDB, etc.)
     this.dataEncryptionKey = new kms.Key(this, 'DataEncryptionKey', {
-      description: 'KMS key for encrypting meeting scheduling agent data',
+      description: 'KMS key for encrypting Kalendlytic data',
       enableKeyRotation: true,
       keySpec: kms.KeySpec.SYMMETRIC_DEFAULT,
       keyUsage: kms.KeyUsage.ENCRYPT_DECRYPT,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
     });
 
-    this.dataEncryptionKey.addAlias('alias/meeting-agent-data');
+    this.dataEncryptionKey.addAlias('alias/kalendlytic-data');
 
     // Separate KMS key for OAuth token encryption
     this.tokenEncryptionKey = new kms.Key(this, 'TokenEncryptionKey', {
@@ -72,13 +72,13 @@ export class CoreStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev environment
     });
 
-    this.tokenEncryptionKey.addAlias('alias/meeting-agent-tokens');
+    this.tokenEncryptionKey.addAlias('alias/kalendlytic-tokens');
   }
 
   private createDynamoDBTables(): void {
     // Users table
     this.usersTable = new dynamodb.Table(this, 'UsersTable', {
-      tableName: 'meeting-agent-users',
+      tableName: 'kalendlytic-users',
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING,
@@ -92,7 +92,7 @@ export class CoreStack extends cdk.Stack {
 
     // Connections table for OAuth tokens
     this.connectionsTable = new dynamodb.Table(this, 'ConnectionsTable', {
-      tableName: 'meeting-agent-connections',
+      tableName: 'kalendlytic-connections',
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING,
@@ -120,7 +120,7 @@ export class CoreStack extends cdk.Stack {
 
     // Preferences table
     this.preferencesTable = new dynamodb.Table(this, 'PreferencesTable', {
-      tableName: 'meeting-agent-preferences',
+      tableName: 'kalendlytic-preferences',
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING,
@@ -134,7 +134,7 @@ export class CoreStack extends cdk.Stack {
 
     // Meetings table
     this.meetingsTable = new dynamodb.Table(this, 'MeetingsTable', {
-      tableName: 'meeting-agent-meetings',
+      tableName: 'kalendlytic-meetings',
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING,
@@ -165,7 +165,7 @@ export class CoreStack extends cdk.Stack {
 
     // Agent runs table for tracking AI operations
     this.agentRunsTable = new dynamodb.Table(this, 'AgentRunsTable', {
-      tableName: 'meeting-agent-runs',
+      tableName: 'kalendlytic-runs',
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING,
@@ -193,7 +193,7 @@ export class CoreStack extends cdk.Stack {
 
     // Audit logs table
     this.auditLogsTable = new dynamodb.Table(this, 'AuditLogsTable', {
-      tableName: 'meeting-agent-audit-logs',
+      tableName: 'kalendlytic-audit-logs',
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING,
@@ -227,7 +227,7 @@ export class CoreStack extends cdk.Stack {
   private createCognitoTriggerFunction(): void {
     // Create Lambda function for Cognito triggers
     this.cognitoTriggersFunction = new lambda.Function(this, 'CognitoTriggersFunction', {
-      functionName: 'meeting-agent-cognito-triggers',
+      functionName: 'kalendlytic-cognito-triggers',
       runtime: lambda.Runtime.PYTHON_3_11,
       handler: 'cognito_triggers.lambda_handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../../backend/src/lambda_functions')),
@@ -238,7 +238,7 @@ export class CoreStack extends cdk.Stack {
         PREFERENCES_TABLE_NAME: this.preferencesTable.tableName,
         LOG_LEVEL: 'INFO'
       },
-      description: 'Handles Cognito user lifecycle events and creates user profiles'
+      description: 'Handles Cognito user lifecycle events and creates Kalendlytic user profiles'
     });
 
     // Grant permissions to write to DynamoDB tables
@@ -253,14 +253,14 @@ export class CoreStack extends cdk.Stack {
         'logs:CreateLogStream',
         'logs:PutLogEvents'
       ],
-      resources: [`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/meeting-agent-cognito-triggers:*`]
+      resources: [`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/kalendlytic-cognito-triggers:*`]
     }));
   }
 
   private createCognitoResources(): void {
     // Create Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'UserPool', {
-      userPoolName: 'meeting-agent-users',
+      userPoolName: 'kalendlytic-users',
       selfSignUpEnabled: true,
       signInAliases: {
         email: true,
@@ -317,7 +317,7 @@ export class CoreStack extends cdk.Stack {
 
     // Create User Pool Client
     this.userPoolClient = this.userPool.addClient('UserPoolClient', {
-      userPoolClientName: 'meeting-agent-web-client',
+      userPoolClientName: 'kalendlytic-web-client',
       generateSecret: false, // For SPA applications
       authFlows: {
         userSrp: true,
@@ -349,7 +349,7 @@ export class CoreStack extends cdk.Stack {
 
     // Create Identity Pool for AWS resource access
     this.identityPool = new cognito.CfnIdentityPool(this, 'IdentityPool', {
-      identityPoolName: 'meeting-agent-identity-pool',
+      identityPoolName: 'kalendlytic-identity-pool',
       allowUnauthenticatedIdentities: false,
       cognitoIdentityProviders: [
         {
@@ -390,8 +390,8 @@ export class CoreStack extends cdk.Stack {
   private createSecretsManagerSecrets(): void {
     // Google OAuth credentials
     this.googleOAuthSecret = new secretsmanager.Secret(this, 'GoogleOAuthSecret', {
-      secretName: 'meeting-agent/oauth/google',
-      description: 'Google OAuth 2.0 client credentials for calendar and Gmail access',
+      secretName: 'kalendlytic/oauth/google',
+      description: 'Google OAuth 2.0 client credentials for Kalendlytic calendar and Gmail access',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           client_id: '',
@@ -406,8 +406,8 @@ export class CoreStack extends cdk.Stack {
 
     // Microsoft OAuth credentials
     this.microsoftOAuthSecret = new secretsmanager.Secret(this, 'MicrosoftOAuthSecret', {
-      secretName: 'meeting-agent/oauth/microsoft',
-      description: 'Microsoft Graph OAuth 2.0 client credentials for calendar and mail access',
+      secretName: 'kalendlytic/oauth/microsoft',
+      description: 'Microsoft Graph OAuth 2.0 client credentials for Kalendlytic calendar and mail access',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           client_id: '',
@@ -430,89 +430,89 @@ export class CoreStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: this.userPool.userPoolId,
       description: 'Cognito User Pool ID',
-      exportName: 'meeting-agent-user-pool-id',
+      exportName: 'kalendlytic-user-pool-id',
     });
 
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: this.userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID',
-      exportName: 'meeting-agent-user-pool-client-id',
+      exportName: 'kalendlytic-user-pool-client-id',
     });
 
     new cdk.CfnOutput(this, 'IdentityPoolId', {
       value: this.identityPool.ref,
       description: 'Cognito Identity Pool ID',
-      exportName: 'meeting-agent-identity-pool-id',
+      exportName: 'kalendlytic-identity-pool-id',
     });
 
     // DynamoDB table outputs
     new cdk.CfnOutput(this, 'UsersTableName', {
       value: this.usersTable.tableName,
       description: 'Users DynamoDB table name',
-      exportName: 'meeting-agent-users-table',
+      exportName: 'kalendlytic-users-table',
     });
 
     new cdk.CfnOutput(this, 'ConnectionsTableName', {
       value: this.connectionsTable.tableName,
       description: 'Connections DynamoDB table name',
-      exportName: 'meeting-agent-connections-table',
+      exportName: 'kalendlytic-connections-table',
     });
 
     new cdk.CfnOutput(this, 'PreferencesTableName', {
       value: this.preferencesTable.tableName,
       description: 'Preferences DynamoDB table name',
-      exportName: 'meeting-agent-preferences-table',
+      exportName: 'kalendlytic-preferences-table',
     });
 
     new cdk.CfnOutput(this, 'MeetingsTableName', {
       value: this.meetingsTable.tableName,
       description: 'Meetings DynamoDB table name',
-      exportName: 'meeting-agent-meetings-table',
+      exportName: 'kalendlytic-meetings-table',
     });
 
     new cdk.CfnOutput(this, 'AgentRunsTableName', {
       value: this.agentRunsTable.tableName,
       description: 'Agent Runs DynamoDB table name',
-      exportName: 'meeting-agent-runs-table',
+      exportName: 'kalendlytic-runs-table',
     });
 
     new cdk.CfnOutput(this, 'AuditLogsTableName', {
       value: this.auditLogsTable.tableName,
       description: 'Audit Logs DynamoDB table name',
-      exportName: 'meeting-agent-audit-logs-table',
+      exportName: 'kalendlytic-audit-logs-table',
     });
 
     // KMS key outputs
     new cdk.CfnOutput(this, 'DataEncryptionKeyId', {
       value: this.dataEncryptionKey.keyId,
       description: 'Data encryption KMS key ID',
-      exportName: 'meeting-agent-data-key-id',
+      exportName: 'kalendlytic-data-key-id',
     });
 
     new cdk.CfnOutput(this, 'TokenEncryptionKeyId', {
       value: this.tokenEncryptionKey.keyId,
       description: 'Token encryption KMS key ID',
-      exportName: 'meeting-agent-token-key-id',
+      exportName: 'kalendlytic-token-key-id',
     });
 
     // Secrets Manager outputs
     new cdk.CfnOutput(this, 'GoogleOAuthSecretArn', {
       value: this.googleOAuthSecret.secretArn,
       description: 'Google OAuth secret ARN',
-      exportName: 'meeting-agent-google-oauth-secret',
+      exportName: 'kalendlytic-google-oauth-secret',
     });
 
     new cdk.CfnOutput(this, 'MicrosoftOAuthSecretArn', {
       value: this.microsoftOAuthSecret.secretArn,
       description: 'Microsoft OAuth secret ARN',
-      exportName: 'meeting-agent-microsoft-oauth-secret',
+      exportName: 'kalendlytic-microsoft-oauth-secret',
     });
 
     // Lambda function outputs
     new cdk.CfnOutput(this, 'CognitoTriggersFunctionArn', {
       value: this.cognitoTriggersFunction.functionArn,
       description: 'Cognito triggers Lambda function ARN',
-      exportName: 'meeting-agent-cognito-triggers-function',
+      exportName: 'kalendlytic-cognito-triggers-function',
     });
   }
 }

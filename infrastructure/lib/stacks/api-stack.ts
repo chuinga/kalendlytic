@@ -47,18 +47,18 @@ export class ApiStack extends cdk.Stack {
     // Common environment variables for all Lambda functions
     // Using hardcoded table names to avoid circular dependencies
     const commonEnvironment = {
-      USERS_TABLE: 'meeting-agent-users',
-      CONNECTIONS_TABLE: 'meeting-agent-connections',
-      PREFERENCES_TABLE: 'meeting-agent-preferences',
-      MEETINGS_TABLE: 'meeting-agent-meetings',
-      AGENT_RUNS_TABLE: 'meeting-agent-runs',
-      AUDIT_LOGS_TABLE: 'meeting-agent-audit-logs',
+      USERS_TABLE: 'kalendlytic-users',
+      CONNECTIONS_TABLE: 'kalendlytic-connections',
+      PREFERENCES_TABLE: 'kalendlytic-preferences',
+      MEETINGS_TABLE: 'kalendlytic-meetings',
+      AGENT_RUNS_TABLE: 'kalendlytic-runs',
+      AUDIT_LOGS_TABLE: 'kalendlytic-audit-logs',
       REGION: this.region,
       // Logging configuration
       LOG_LEVEL: 'INFO',
       ENVIRONMENT: 'dev',
-      LOG_GROUP_PREFIX: '/aws/lambda/meeting-agent',
-      AGENT_DECISION_LOG_GROUP: '/aws/lambda/meeting-agent-agent-decisions',
+      LOG_GROUP_PREFIX: '/aws/lambda/kalendlytic',
+      AGENT_DECISION_LOG_GROUP: '/aws/lambda/kalendlytic-agent-decisions',
       PII_REDACTION_ENABLED: 'true',
       PERFORMANCE_LOGGING_ENABLED: 'true',
     };
@@ -80,7 +80,7 @@ export class ApiStack extends cdk.Stack {
     // Auth Handler - handles Cognito authentication and user management
     this.authHandler = new lambda.Function(this, 'AuthHandler', {
       ...commonLambdaProps,
-      functionName: 'meeting-agent-auth-handler',
+      functionName: 'kalendlytic-auth-handler',
       code: lambda.Code.fromInline(`
 import json
 
@@ -91,13 +91,13 @@ def lambda_handler(event, context):
     }
 `),
       handler: 'index.lambda_handler',
-      description: 'Handles user authentication and profile management',
+      description: 'Kalendlytic: Handles user authentication and profile management',
     });
 
     // Connections Handler - manages OAuth connections to Google and Microsoft
     this.connectionsHandler = new lambda.Function(this, 'ConnectionsHandler', {
       ...commonLambdaProps,
-      functionName: 'meeting-agent-connections-handler',
+      functionName: 'kalendlytic-connections-handler',
       code: lambda.Code.fromInline(`
 import json
 
@@ -108,14 +108,14 @@ def lambda_handler(event, context):
     }
 `),
       handler: 'index.lambda_handler',
-      description: 'Manages OAuth connections to calendar providers',
+      description: 'Kalendlytic: Manages OAuth connections to calendar providers',
       timeout: cdk.Duration.seconds(60), // Longer timeout for OAuth flows
     });
 
     // Agent Handler - orchestrates AI agent operations using Bedrock
     this.agentHandler = new lambda.Function(this, 'AgentHandler', {
       ...commonLambdaProps,
-      functionName: 'meeting-agent-agent-handler',
+      functionName: 'kalendlytic-agent-handler',
       code: lambda.Code.fromInline(`
 import json
 
@@ -126,7 +126,7 @@ def lambda_handler(event, context):
     }
 `),
       handler: 'index.lambda_handler',
-      description: 'Orchestrates AI agent operations using Amazon Bedrock',
+      description: 'Kalendlytic: Orchestrates AI agent operations using Amazon Bedrock',
       timeout: cdk.Duration.minutes(5), // Longer timeout for AI processing
       memorySize: 1024, // More memory for AI operations
     });
@@ -134,7 +134,7 @@ def lambda_handler(event, context):
     // Calendar Handler - manages calendar operations and availability
     this.calendarHandler = new lambda.Function(this, 'CalendarHandler', {
       ...commonLambdaProps,
-      functionName: 'meeting-agent-calendar-handler',
+      functionName: 'kalendlytic-calendar-handler',
       code: lambda.Code.fromInline(`
 import json
 
@@ -145,14 +145,14 @@ def lambda_handler(event, context):
     }
 `),
       handler: 'index.lambda_handler',
-      description: 'Manages calendar operations and availability aggregation',
+      description: 'Kalendlytic: Manages calendar operations and availability aggregation',
       timeout: cdk.Duration.seconds(60), // Longer timeout for calendar API calls
     });
 
     // Preferences Handler - manages user preferences and settings
     this.preferencesHandler = new lambda.Function(this, 'PreferencesHandler', {
       ...commonLambdaProps,
-      functionName: 'meeting-agent-preferences-handler',
+      functionName: 'kalendlytic-preferences-handler',
       code: lambda.Code.fromInline(`
 import json
 
@@ -163,7 +163,7 @@ def lambda_handler(event, context):
     }
 `),
       handler: 'index.lambda_handler',
-      description: 'Manages user preferences and scheduling settings',
+      description: 'Kalendlytic: Manages user preferences and scheduling settings',
     });
 
     // Grant permissions to Lambda functions
@@ -193,13 +193,13 @@ def lambda_handler(event, context):
             'dynamodb:Scan',
           ],
           resources: [
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-users`,
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-connections`,
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-preferences`,
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-meetings`,
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-runs`,
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-audit-logs`,
-            `arn:aws:dynamodb:${this.region}:${this.account}:table/meeting-agent-*/index/*`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-users`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-connections`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-preferences`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-meetings`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-runs`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-audit-logs`,
+            `arn:aws:dynamodb:${this.region}:${this.account}:table/kalendlytic-*/index/*`,
           ],
         })
       );
@@ -230,7 +230,7 @@ def lambda_handler(event, context):
             'secretsmanager:DescribeSecret',
           ],
           resources: [
-            `arn:aws:secretsmanager:${this.region}:${this.account}:secret:meeting-agent/oauth/*`,
+            `arn:aws:secretsmanager:${this.region}:${this.account}:secret:kalendlytic/oauth/*`,
           ],
         })
       );
@@ -288,8 +288,8 @@ def lambda_handler(event, context):
   private createApiGateway(): void {
     // Create REST API with CORS configuration
     this.restApi = new apigateway.RestApi(this, 'RestApi', {
-      restApiName: 'meeting-agent-api',
-      description: 'REST API for AWS Meeting Scheduling Agent',
+      restApiName: 'kalendlytic-api',
+      description: 'REST API for Kalendlytic - AI-powered meeting scheduling',
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -380,12 +380,12 @@ def lambda_handler(event, context):
   private createEventProcessing(): void {
     // Create SQS queue for periodic calendar scanning
     this.periodicScanQueue = new sqs.Queue(this, 'PeriodicScanQueue', {
-      queueName: 'meeting-agent-periodic-scan',
+      queueName: 'kalendlytic-periodic-scan',
       visibilityTimeout: cdk.Duration.minutes(6), // Longer than Lambda timeout
       retentionPeriod: cdk.Duration.days(14),
       deadLetterQueue: {
         queue: new sqs.Queue(this, 'PeriodicScanDLQ', {
-          queueName: 'meeting-agent-periodic-scan-dlq',
+          queueName: 'kalendlytic-periodic-scan-dlq',
           retentionPeriod: cdk.Duration.days(14),
         }),
         maxReceiveCount: 3,
@@ -402,7 +402,7 @@ def lambda_handler(event, context):
 
     // Create EventBridge rule for periodic calendar scanning (every 15 minutes)
     const periodicScanRule = new events.Rule(this, 'PeriodicScanRule', {
-      ruleName: 'meeting-agent-periodic-scan',
+      ruleName: 'kalendlytic-periodic-scan',
       description: 'Triggers periodic calendar scanning for conflict detection',
       schedule: events.Schedule.rate(cdk.Duration.minutes(15)),
     });
@@ -419,7 +419,7 @@ def lambda_handler(event, context):
 
     // Create EventBridge rule for daily preference learning (every day at 2 AM)
     const dailyLearningRule = new events.Rule(this, 'DailyLearningRule', {
-      ruleName: 'meeting-agent-daily-learning',
+      ruleName: 'kalendlytic-daily-learning',
       description: 'Triggers daily preference learning and optimization',
       schedule: events.Schedule.cron({
         minute: '0',
@@ -445,32 +445,32 @@ def lambda_handler(event, context):
     new cdk.CfnOutput(this, 'RestApiUrl', {
       value: this.restApi.url,
       description: 'REST API Gateway endpoint URL',
-      exportName: 'meeting-agent-api-url',
+      exportName: 'kalendlytic-api-url',
     });
 
     new cdk.CfnOutput(this, 'RestApiId', {
       value: this.restApi.restApiId,
       description: 'REST API Gateway ID',
-      exportName: 'meeting-agent-api-id',
+      exportName: 'kalendlytic-api-id',
     });
 
     // Lambda function ARNs for monitoring
     new cdk.CfnOutput(this, 'AuthHandlerArn', {
       value: this.authHandler.functionArn,
       description: 'Auth handler Lambda function ARN',
-      exportName: 'meeting-agent-auth-handler-arn',
+      exportName: 'kalendlytic-auth-handler-arn',
     });
 
     new cdk.CfnOutput(this, 'AgentHandlerArn', {
       value: this.agentHandler.functionArn,
       description: 'Agent handler Lambda function ARN',
-      exportName: 'meeting-agent-agent-handler-arn',
+      exportName: 'kalendlytic-agent-handler-arn',
     });
 
     new cdk.CfnOutput(this, 'CalendarHandlerArn', {
       value: this.calendarHandler.functionArn,
       description: 'Calendar handler Lambda function ARN',
-      exportName: 'meeting-agent-calendar-handler-arn',
+      exportName: 'kalendlytic-calendar-handler-arn',
     });
   }
 }

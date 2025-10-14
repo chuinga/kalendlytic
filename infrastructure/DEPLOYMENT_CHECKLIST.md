@@ -1,6 +1,6 @@
-# AWS Meeting Scheduling Agent - Deployment Checklist
+# Kalendlytic - Deployment Checklist
 
-This checklist ensures proper deployment and configuration of the AWS Meeting Scheduling Agent infrastructure.
+This checklist ensures proper deployment and configuration of the Kalendlytic infrastructure.
 
 ## Pre-Deployment Checklist
 

@@ -59,7 +59,7 @@ export class MonitoringStack extends cdk.Stack {
   private createLogRetentionPolicies(apiStack: ApiStack): void {
     // Create S3 bucket for log archival
     this.logArchiveBucket = new s3.Bucket(this, 'LogArchiveBucket', {
-      bucketName: `meeting-agent-logs-archive-${this.account}-${this.region}`,
+      bucketName: `kalendlytic-logs-archive-${this.account}-${this.region}`,
       versioned: false,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -144,7 +144,7 @@ export class MonitoringStack extends cdk.Stack {
   private createLogAggregation(): void {
     // Create Lambda function for log aggregation and analysis
     this.logAggregatorFunction = new lambda.Function(this, 'LogAggregatorFunction', {
-      functionName: 'meeting-agent-log-aggregator',
+      functionName: 'kalendlytic-log-aggregator',
       runtime: lambda.Runtime.PYTHON_3_11,
       architecture: lambda.Architecture.ARM_64,
       handler: 'index.lambda_handler',
@@ -152,7 +152,7 @@ export class MonitoringStack extends cdk.Stack {
       memorySize: 512,
       environment: {
         LOG_ARCHIVE_BUCKET: this.logArchiveBucket.bucketName,
-        AGENT_DECISION_LOG_GROUP: '/aws/lambda/meeting-agent-agent-decisions',
+        AGENT_DECISION_LOG_GROUP: '/aws/lambda/kalendlytic-agent-decisions',
       },
       code: lambda.Code.fromInline(`
 import json
@@ -278,7 +278,7 @@ def create_decision_summary(decisions: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     // Schedule log aggregation to run every hour
     const aggregationRule = new events.Rule(this, 'LogAggregationRule', {
-      ruleName: 'meeting-agent-log-aggregation',
+      ruleName: 'kalendlytic-log-aggregation',
       description: 'Triggers hourly log aggregation and analysis',
       schedule: events.Schedule.rate(cdk.Duration.hours(1)),
     });
@@ -296,7 +296,7 @@ def create_decision_summary(decisions: List[Dict[str, Any]]) -> Dict[str, Any]:
   private createAgentDecisionTracking(): void {
     // Create dedicated log group for agent decisions
     this.agentDecisionLogGroup = new logs.LogGroup(this, 'AgentDecisionLogGroup', {
-      logGroupName: '/aws/lambda/meeting-agent-agent-decisions',
+      logGroupName: '/aws/lambda/kalendlytic-agent-decisions',
       retention: logs.RetentionDays.THREE_MONTHS, // Longer retention for audit trails
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -341,15 +341,15 @@ def create_decision_summary(decisions: List[Dict[str, Any]]) -> Dict[str, Any]:
   private createHealthCheckEndpoints(apiStack: ApiStack): void {
     // Create health check Lambda function
     this.healthCheckFunction = new lambda.Function(this, 'HealthCheckFunction', {
-      functionName: 'meeting-agent-health-check',
+      functionName: 'kalendlytic-health-check',
       runtime: lambda.Runtime.PYTHON_3_11,
       architecture: lambda.Architecture.ARM_64,
       handler: 'index.lambda_handler',
       timeout: cdk.Duration.seconds(30),
       memorySize: 256,
       environment: {
-        USERS_TABLE: 'meeting-agent-users',
-        CONNECTIONS_TABLE: 'meeting-agent-connections',
+        USERS_TABLE: 'kalendlytic-users',
+        CONNECTIONS_TABLE: 'kalendlytic-connections',
         REGION: this.region,
       },
       code: lambda.Code.fromInline(`
@@ -425,7 +425,7 @@ def check_dynamodb() -> Dict[str, Any]:
         dynamodb = boto3.client('dynamodb')
         
         start_time = time.time()
-        response = dynamodb.describe_table(TableName='meeting-agent-users')
+        response = dynamodb.describe_table(TableName='kalendlytic-users')
         response_time = (time.time() - start_time) * 1000
         
         return {
@@ -567,7 +567,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
     // Create EventBridge rule for periodic health checks (every 5 minutes)
     const healthCheckRule = new events.Rule(this, 'HealthCheckRule', {
-      ruleName: 'meeting-agent-health-check',
+      ruleName: 'kalendlytic-health-check',
       description: 'Triggers periodic health checks',
       schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
     });
@@ -590,7 +590,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
     new logs.MetricFilter(this, 'BedrockTokenUsageFilter', {
       logGroup: this.agentDecisionLogGroup,
       filterPattern: logs.FilterPattern.exists('$.bedrock_usage.input_tokens'),
-      metricNamespace: 'MeetingAgent/Bedrock',
+      metricNamespace: 'Kalendlytic/Bedrock',
       metricName: 'InputTokens',
       metricValue: '$.bedrock_usage.input_tokens',
     });
@@ -599,7 +599,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
     new logs.MetricFilter(this, 'BedrockCostFilter', {
       logGroup: this.agentDecisionLogGroup,
       filterPattern: logs.FilterPattern.exists('$.cost_estimate.estimated_cost_usd'),
-      metricNamespace: 'MeetingAgent/Bedrock',
+      metricNamespace: 'Kalendlytic/Bedrock',
       metricName: 'EstimatedCostUSD',
       metricValue: '$.cost_estimate.estimated_cost_usd',
     });
@@ -608,7 +608,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
     new logs.MetricFilter(this, 'AgentSuccessFilter', {
       logGroup: this.agentDecisionLogGroup,
       filterPattern: logs.FilterPattern.stringValue('$.success', '=', 'true'),
-      metricNamespace: 'MeetingAgent/Agent',
+      metricNamespace: 'Kalendlytic/Agent',
       metricName: 'SuccessfulDecisions',
       metricValue: '1',
     });
@@ -616,7 +616,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
     new logs.MetricFilter(this, 'AgentFailureFilter', {
       logGroup: this.agentDecisionLogGroup,
       filterPattern: logs.FilterPattern.stringValue('$.success', '=', 'false'),
-      metricNamespace: 'MeetingAgent/Agent',
+      metricNamespace: 'Kalendlytic/Agent',
       metricName: 'FailedDecisions',
       metricValue: '1',
     });
@@ -624,7 +624,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
   private createDashboard(apiStack: ApiStack, webStack: WebStack): void {
     this.systemDashboard = new cloudwatch.Dashboard(this, 'SystemDashboard', {
-      dashboardName: 'meeting-agent-system-overview',
+      dashboardName: 'kalendlytic-system-overview',
     });
 
     // API Gateway metrics
@@ -786,7 +786,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
     // Create SNS topic for alerts
     this.alertingTopic = new sns.Topic(this, 'AlertingTopic', {
       topicName: 'meeting-agent-alerts',
-      displayName: 'Meeting Agent System Alerts',
+      displayName: 'Kalendlytic System Alerts',
     });
 
     // Add email subscription (placeholder - should be configured via environment variables)
@@ -796,7 +796,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
     // Create alarms for system health
     const systemHealthAlarm = new cloudwatch.Alarm(this, 'SystemHealthAlarm', {
-      alarmName: 'meeting-agent-system-unhealthy',
+      alarmName: 'kalendlytic-system-unhealthy',
       alarmDescription: 'System health check is failing',
       metric: new cloudwatch.Metric({
         namespace: 'MeetingAgent/Health',
@@ -814,7 +814,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
     // Create alarms for API Gateway errors
     const apiErrorAlarm = new cloudwatch.Alarm(this, 'ApiErrorAlarm', {
-      alarmName: 'meeting-agent-api-high-error-rate',
+      alarmName: 'kalendlytic-api-high-error-rate',
       alarmDescription: 'API Gateway error rate is too high',
       metric: new cloudwatch.Metric({
         namespace: 'AWS/ApiGateway',
@@ -843,7 +843,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
     lambdaFunctions.forEach(({ name, function: lambdaFunction }) => {
       const errorAlarm = new cloudwatch.Alarm(this, `${name}ErrorAlarm`, {
-        alarmName: `meeting-agent-${name.toLowerCase().replace(' ', '-')}-errors`,
+        alarmName: `kalendlytic-${name.toLowerCase().replace(' ', '-')}-errors`,
         alarmDescription: `${name} Lambda function error rate is too high`,
         metric: new cloudwatch.Metric({
           namespace: 'AWS/Lambda',
@@ -863,7 +863,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
       // Duration alarm for performance monitoring
       const durationAlarm = new cloudwatch.Alarm(this, `${name}DurationAlarm`, {
-        alarmName: `meeting-agent-${name.toLowerCase().replace(' ', '-')}-high-duration`,
+        alarmName: `kalendlytic-${name.toLowerCase().replace(' ', '-')}-high-duration`,
         alarmDescription: `${name} Lambda function duration is too high`,
         metric: new cloudwatch.Metric({
           namespace: 'AWS/Lambda',
@@ -884,7 +884,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
     // Create alarm for Bedrock costs
     const bedrockCostAlarm = new cloudwatch.Alarm(this, 'BedrockCostAlarm', {
-      alarmName: 'meeting-agent-bedrock-high-cost',
+      alarmName: 'kalendlytic-bedrock-high-cost',
       alarmDescription: 'Bedrock usage costs are exceeding threshold',
       metric: new cloudwatch.Metric({
         namespace: 'MeetingAgent/Bedrock',
@@ -901,7 +901,7 @@ def publish_health_metrics(health_status: Dict[str, Any]) -> None:
 
     // Create alarm for agent decision failure rate
     const agentFailureAlarm = new cloudwatch.Alarm(this, 'AgentFailureAlarm', {
-      alarmName: 'meeting-agent-high-failure-rate',
+      alarmName: 'kalendlytic-high-failure-rate',
       alarmDescription: 'Agent decision failure rate is too high',
       metric: new cloudwatch.Metric({
         namespace: 'MeetingAgent/Agent',
