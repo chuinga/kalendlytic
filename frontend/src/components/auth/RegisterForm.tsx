@@ -73,7 +73,7 @@ export default function RegisterForm({ onSwitchToLogin, onRegistrationSuccess }:
     <div className="w-full">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-        <p className="text-gray-600">Join Meeting Scheduler today</p>
+        <p className="text-gray-600">Join Kalendlytic today</p>
       </div>
 
       {error && (

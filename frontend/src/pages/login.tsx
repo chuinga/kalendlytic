@@ -16,8 +16,8 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>Sign In - Meeting Scheduler</title>
-        <meta name="description" content="Sign in to your Meeting Scheduler account" />
+        <title>Sign In - Kalendlytic</title>
+        <meta name="description" content="Sign in to your Kalendlytic account" />
       </Head>
       
       <ProtectedRoute requireAuth={false}>
@@ -29,7 +29,7 @@ export default function LoginPage() {
                 <Calendar className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Meeting Scheduler
+                Kalendlytic
               </h1>
               <p className="text-gray-600">
                 AI-powered meeting management across Gmail and Outlook

@@ -6,7 +6,7 @@ export default function DashboardPage() {
   return (
     <>
       <Head>
-        <title>Dashboard - Meeting Scheduler</title>
+        <title>Dashboard - Kalendlytic</title>
         <meta name="description" content="Manage your meetings and calendar integrations" />
       </Head>
       

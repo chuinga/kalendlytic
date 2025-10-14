@@ -151,7 +151,7 @@ export default function Dashboard() {
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-xl font-bold text-gray-900">Meeting Scheduler</h1>
+                  <h1 className="text-xl font-bold text-gray-900">Kalendlytic</h1>
                 </div>
               </div>
             </div>
