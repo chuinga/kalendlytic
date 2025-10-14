@@ -1,4 +1,4 @@
-import { getCurrentUser, signIn, signUp, signOut, fetchAuthSession, updateUserAttributes, fetchUserAttributes } from 'aws-amplify/auth'
+import { getCurrentUser, signIn, signUp, signOut, fetchAuthSession, updateUserAttributes, fetchUserAttributes, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth'
 import { User, LoginCredentials, RegisterCredentials, UserProfile } from '@/types/auth'
 
 export class AuthService {
@@ -151,6 +151,39 @@ export class AuthService {
     } catch (error: any) {
       console.error('Update profile error:', error)
       throw new Error(error.message || 'Failed to update profile')
+    }
+  }
+
+  /**
+   * Confirm user sign up with verification code
+   */
+  static async confirmSignUp(email: string, code: string): Promise<void> {
+    try {
+      const { isSignUpComplete } = await confirmSignUp({
+        username: email,
+        confirmationCode: code
+      })
+
+      if (!isSignUpComplete) {
+        throw new Error('Sign up confirmation failed')
+      }
+    } catch (error: any) {
+      console.error('Confirm sign up error:', error)
+      throw new Error(error.message || 'Failed to confirm sign up')
+    }
+  }
+
+  /**
+   * Resend confirmation code to user's email
+   */
+  static async resendConfirmationCode(email: string): Promise<void> {
+    try {
+      await resendSignUpCode({
+        username: email
+      })
+    } catch (error: any) {
+      console.error('Resend confirmation code error:', error)
+      throw new Error(error.message || 'Failed to resend confirmation code')
     }
   }
 

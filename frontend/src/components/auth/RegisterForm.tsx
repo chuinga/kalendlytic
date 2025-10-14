@@ -7,7 +7,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
-  onRegistrationSuccess: () => void
+  onRegistrationSuccess: (email: string) => void
 }
 
 const timezones = [
@@ -44,8 +44,19 @@ export default function RegisterForm({ onSwitchToLogin, onRegistrationSuccess }:
     try {
       clearError()
       await registerUser(data)
-      onRegistrationSuccess()
+      // If we get here, registration was successful
+      localStorage.setItem('tempPassword', data.password)
+      onRegistrationSuccess(data.email)
     } catch (error: any) {
+      console.log('Registration error:', error.message)
+      if (error.message.includes('CONFIRM_SIGN_UP_REQUIRED') || error.message.includes('CONFIRM_SIGN_UP')) {
+        // Account created successfully, save password for auto-login and show verification screen
+        localStorage.setItem('tempPassword', data.password)
+        onRegistrationSuccess(data.email)
+        return
+      }
+      
+      // Handle other errors
       if (error.message.includes('UsernameExistsException')) {
         setError('email', { 
           message: 'An account with this email already exists.' 

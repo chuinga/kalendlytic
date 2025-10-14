@@ -146,6 +146,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const confirmSignUp = async (email: string, code: string) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      dispatch({ type: 'CLEAR_ERROR' })
+      
+      await AuthService.confirmSignUp(email, code)
+      dispatch({ type: 'SET_LOADING', payload: false })
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.message })
+      throw error
+    }
+  }
+
+  const resendConfirmationCode = async (email: string) => {
+    try {
+      dispatch({ type: 'CLEAR_ERROR' })
+      await AuthService.resendConfirmationCode(email)
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.message })
+      throw error
+    }
+  }
+
   const clearError = () => {
     dispatch({ type: 'CLEAR_ERROR' })
   }
@@ -160,6 +183,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     updateProfile,
     refreshToken,
+    confirmSignUp,
+    resendConfirmationCode,
     clearError
   }
 

@@ -291,10 +291,7 @@ def lambda_handler(event, context):
       restApiName: 'meeting-agent-api',
       description: 'REST API for AWS Meeting Scheduling Agent',
       defaultCorsPreflightOptions: {
-        allowOrigins: [
-          'http://localhost:3000', // Local development
-          // Production origins will be added via environment variables
-        ],
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: [
           'Content-Type',

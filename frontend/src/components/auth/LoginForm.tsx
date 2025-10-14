@@ -6,9 +6,10 @@ import { LoginCredentials } from '@/types/auth'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
+  onNeedVerification: (email: string) => void
 }
 
-export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+export default function LoginForm({ onSwitchToRegister, onNeedVerification }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const { login, isLoading, error, clearError } = useAuth()
   
@@ -24,10 +25,9 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       clearError()
       await login(data)
     } catch (error: any) {
-      if (error.message.includes('UserNotConfirmedException')) {
-        setError('email', { 
-          message: 'Please check your email and confirm your account before signing in.' 
-        })
+      if (error.message.includes('UserNotConfirmedException') || 
+          error.message.includes('CONFIRM_SIGN_UP')) {
+        onNeedVerification(data.email)
       } else if (error.message.includes('NotAuthorizedException')) {
         setError('password', { 
           message: 'Invalid email or password.' 

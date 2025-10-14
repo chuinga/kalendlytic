@@ -5,11 +5,13 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import LoginForm from '@/components/auth/LoginForm'
 import RegisterForm from '@/components/auth/RegisterForm'
 import ConfirmationMessage from '@/components/auth/ConfirmationMessage'
+import EmailVerification from '@/components/auth/EmailVerification'
 
-type AuthView = 'login' | 'register' | 'confirmation'
+type AuthView = 'login' | 'register' | 'confirmation' | 'verification'
 
 export default function LoginPage() {
   const [currentView, setCurrentView] = useState<AuthView>('login')
+  const [userEmail, setUserEmail] = useState<string>('')
 
   return (
     <>
@@ -37,18 +39,35 @@ export default function LoginPage() {
             {/* Login Form Card */}
             <div className="bg-white rounded-2xl shadow-lg p-8">
               {currentView === 'login' && (
-                <LoginForm onSwitchToRegister={() => setCurrentView('register')} />
+                <LoginForm 
+                  onSwitchToRegister={() => setCurrentView('register')}
+                  onNeedVerification={(email) => {
+                    setUserEmail(email)
+                    setCurrentView('verification')
+                  }}
+                />
               )}
               
               {currentView === 'register' && (
                 <RegisterForm
                   onSwitchToLogin={() => setCurrentView('login')}
-                  onRegistrationSuccess={() => setCurrentView('confirmation')}
+                  onRegistrationSuccess={(email) => {
+                    setUserEmail(email)
+                    setCurrentView('verification')
+                  }}
                 />
               )}
               
               {currentView === 'confirmation' && (
                 <ConfirmationMessage onBackToLogin={() => setCurrentView('login')} />
+              )}
+              
+              {currentView === 'verification' && (
+                <EmailVerification
+                  email={userEmail}
+                  onBackToLogin={() => setCurrentView('login')}
+                  onVerificationSuccess={() => setCurrentView('login')}
+                />
               )}
             </div>
 
