@@ -110,34 +110,8 @@ export class MonitoringStack extends cdk.Stack {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
       });
 
-      // Create subscription filter for log archival
-      const logArchivalRole = new iam.Role(this, `${name}LogArchivalRole`, {
-        assumedBy: new iam.ServicePrincipal('logs.amazonaws.com'),
-        inlinePolicies: {
-          S3WritePolicy: new iam.PolicyDocument({
-            statements: [
-              new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: [
-                  's3:PutObject',
-                  's3:PutObjectAcl',
-                ],
-                resources: [
-                  `${this.logArchiveBucket.bucketArn}/*`,
-                ],
-              }),
-            ],
-          }),
-        },
-      });
-
-      // Create subscription filter to archive logs to S3
-      new logs.CfnSubscriptionFilter(this, `${name}LogArchivalFilter`, {
-        logGroupName: logGroup.logGroupName,
-        filterPattern: '', // Archive all logs
-        destinationArn: `arn:aws:s3:::${this.logArchiveBucket.bucketName}/lambda-logs/${name}/`,
-        roleArn: logArchivalRole.roleArn,
-      });
+      // Note: Log archival is handled by the log aggregator function
+      // CloudWatch Logs subscription filters don't support S3 destinations directly
     });
   }
 
@@ -269,7 +243,7 @@ def create_decision_summary(decisions: List[Dict[str, Any]]) -> Dict[str, Any]:
           'logs:DescribeLogStreams',
         ],
         resources: [
-          `arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/meeting-agent-*`,
+          `arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/kalendlytic-*`,
         ],
       })
     );
@@ -308,34 +282,8 @@ def create_decision_summary(decisions: List[Dict[str, Any]]) -> Dict[str, Any]:
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // Create subscription filter for agent decision archival
-    const agentDecisionArchivalRole = new iam.Role(this, 'AgentDecisionArchivalRole', {
-      assumedBy: new iam.ServicePrincipal('logs.amazonaws.com'),
-      inlinePolicies: {
-        S3WritePolicy: new iam.PolicyDocument({
-          statements: [
-            new iam.PolicyStatement({
-              effect: iam.Effect.ALLOW,
-              actions: [
-                's3:PutObject',
-                's3:PutObjectAcl',
-              ],
-              resources: [
-                `${this.logArchiveBucket.bucketArn}/agent-decisions/*`,
-              ],
-            }),
-          ],
-        }),
-      },
-    });
-
-    // Archive agent decisions to S3 for long-term storage
-    new logs.CfnSubscriptionFilter(this, 'AgentDecisionArchivalFilter', {
-      logGroupName: this.agentDecisionLogGroup.logGroupName,
-      filterPattern: '{ $.decision_type = * }', // Only archive decision logs
-      destinationArn: `arn:aws:s3:::${this.logArchiveBucket.bucketName}/agent-decisions/`,
-      roleArn: agentDecisionArchivalRole.roleArn,
-    });
+    // Note: Agent decision archival is handled by the log aggregator function
+    // CloudWatch Logs subscription filters don't support S3 destinations directly
   }
 
   private createHealthCheckEndpoints(apiStack: ApiStack): void {
